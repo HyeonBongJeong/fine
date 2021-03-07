@@ -1,500 +1,342 @@
-# fine semiPrj
-## :pushpin: DESK APP :pushpin:
-협업을 위한 그룹웨어
+## 🌞 FINE 🌞
+유기동물 입양 서비스 제공
 
-2020.12 ~ 2021.01
+## 목록 
+1. [개요](#개요)
+2. [기대효과](#기대효과)
+3. [사용도구](#-사용도구)
+4. [개발순서](#-개발순서)
+5. [보완점](#-보완점)
 
-## :mag: Project
+##  ✨ 개요
+유기견들이 많아지고 무분별한 펫샵의 새끼공장으로 인한 반려견의 학대 등등 많은 일이 일어나고 있는 현재 펫샵은 눈에 띄기 쉽게 그리고 다가가기 쉽게 인테리어 되어있고 체인점을 내는곳이 많아졌습니다. 
+하지만 유기견을 보호하는 보호소는 몇몇 사람들에겐 좋지 않은 이미지를 가지고 있습니다.. 유기견이 들어오면 못나가고 안락사 당하는 곳이라고 생각하는 사람들이 많을 것입니다. 그리고 일반 펫샵은 강아지를 입양이라는 개념으로 대하는 것 이 아닌 판매라는 목적으로 반려견들의 견권을 바닥으로 떨어트리고 있습니다.
+유기견 분양도 일반 펫샵처럼 찾아가기 쉽고 다가가기 편하다면 어떨까 생각을 하다가 일반 보호소들은 다 따로 자신들 만의 보호소를 운영하느라 각자의 홈페이지에서 입양,분양을 받는 다는 사실을 알게 되었고 유기견 분양 통합 플랫폼으로 사람들에게 다가간다면 자신의 지역에서 쉽고 간편하게 또 좀 더 다양한 시선으로 유기견을 볼거라 생각이 들어 기획하게 되었습니다.
+## 기대효과
+![11](https://user-images.githubusercontent.com/69295153/106466895-43a05e00-64df-11eb-8310-cacb2e494dfa.PNG)
 
-#### 개요
-사내에서 사용하는 업무메신저를 확장하여 각각의 프로젝트에 인원을 추가할수 있고 진행상황과 서로의 스케줄을 공유하기 위해 만들었습니다. 
+##  🔧 사용도구
+![22](https://user-images.githubusercontent.com/69295153/106466899-44d18b00-64df-11eb-9144-ca27739c153f.PNG)
 
-#### 주요기능
-- 실시간 접속여부확인
-- 1대1채팅과 알림 전송
-- 프로젝트 추가, 수정, 열람 권한부여
-- 로그인 아이디는 일정한 규칙으로 자동 부여
+#### 기타 라이브러리 / API
 
-##  👀 기술스택
-![캡처](https://user-images.githubusercontent.com/69295153/106429174-6fa2eb80-64ad-11eb-9810-c02000325b36.PNG)
+| 라이브러리                    |
+| ------------------------------|
+| jstl                          |
+| JSON-simple                   |
+| JdataPicker                   |
+| cos                           |
+| javaMail API                  |
+| gson                          | 
+| 공공데이터포털                | 
+| 카카오 맵 API                 | 
 
-#### 그 외 API
 
-| 라이브러리                      | 버전       |
-| ------------------------------ | ---------- |
-| jstl                           | 1.2        |
-| JSON-simple                    | **^16.11** |
-| JdataPicker                    | **^5.1**   |
-| Spring WebSocket               | **3.3**    |
-| Lombok Maven Plugin            | **^4.4**   |
-| Mybatis Spring                 | **3.6**    |
-| ojdbc6                         | **4.1.5**  |
-| Apache commons Fileupload      | **4.1.5**  |
-| Naver Smart editer             | 2.2        |
-
-## 👩‍💻 Member
+## 👩‍💻 Member 
 
 #### 오승하
-- 전자결재 기능 전체 (결재 작성, 결재 승인, 결재 분류)
-- 스프링 웹소켓을 활용한 기능 전체 ( 프로젝트 추가 알림보내기, 수신 받은 결재 알림보내기, 채팅 알림보내기 )
-- ajax를 활용하여 DB에 있는 멤버테이블 주소록 전체 불러오기 
+- 공지사항 기능 전체(notice)
+- 글 작성시 고정글 설정 선택가능, 최상단에 위치
+- 파일업로드
 
-## 🔧설정 파일
 
-#### header.js
- ```jsx
-<!-- Global site tag (gtag.js) - Google Analytics -->
-<script async
-	src="https://www.googletagmanager.com/gtag/js?id=UA-119386393-1"></script>
-<script>
-	window.dataLayer = window.dataLayer || [];
-	function gtag() {
-		dataLayer.push(arguments);
+##  🔧 개발순서
+![Fine](https://user-images.githubusercontent.com/69295153/106555996-fa452280-6561-11eb-8402-275fefdcea22.jpg)
+
+### DB 설계
+![Copy of fine (1)](https://user-images.githubusercontent.com/69295153/106625198-cdbcf500-65b9-11eb-8d8d-5b2bf0f4b582.png)
+
+### 테이블 기술서
+![kh2조 semi_1](https://user-images.githubusercontent.com/69295153/106628659-6143f500-65bd-11eb-9410-fb32a3e1f782.jpg)
+![kh2조 semi_2](https://user-images.githubusercontent.com/69295153/106628663-62752200-65bd-11eb-9b1d-0021e40a35b1.jpg)
+![kh2조 semi_3](https://user-images.githubusercontent.com/69295153/106628665-630db880-65bd-11eb-9f7b-77147828e2a9.jpg)
+
+### notice 클래스 다이어그램
+![Untitled Diagram](https://user-images.githubusercontent.com/69295153/106564533-ae4daa00-6570-11eb-8ce7-e412ecd999c2.png)
+
+### 주요소스 
+#### 게시판 페이징
+noticeList.jsp
+```jsx
+public int UpdateNotice(Connection conn, String title, String content, int no , List<String> img) {
+		String sql = "update notice set notice_title = ?, notice_contents = ?" + " where notice_no = ?";
+		int result = 0;
+		int result2 = 0;
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, title);
+			pstmt.setString(2, content);
+			pstmt.setInt(3, no);
+			result = pstmt.executeUpdate();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			close(rs, pstmt);
+		}
+		for (int i = 0; i < img.size(); i++) {
+		
+			sql = "update tbl_img set img = ? where notice_no = ? ";
+			try {
+				pstmt = conn.prepareStatement(sql);
+				pstmt.setString(1, (String)img.get(i));
+				pstmt.setInt(2, no);
+				System.out.println(img);
+				result2 = pstmt.executeUpdate();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			} finally {
+				close(rs, pstmt);
+			}
+		}
+		if (result != 0 && result2 != 0 ) 
+			return 1;
+			else return 0;
 	}
-	gtag('js', new Date());
-	gtag('config', 'UA-119386393-1');
+```
+NoticeDAO.java
+```jsx
+	// 공지사항 목록 페이징 - 공지사항 총 글 개수
+	public int getBoardCount(Connection conn) throws SQLException {
+		int cnt = 0;
+		String sql = "select COUNT(*) from notice";
+		try {
+			stmt = conn.createStatement();
+			rs = stmt.executeQuery(sql);
+			if (rs.next()) {
+				cnt = rs.getInt(1);
+			}
+		} finally {
+			close(rs, pstmt);
+		}
+		return cnt;
+	}
+
+	// 공지사항 목록
+	public List<NoticeVO> getBoardPage(Connection conn, int start, int end) throws SQLException {
+		List<NoticeVO> list = new ArrayList<NoticeVO>();
+		NoticeVO vo = null;
+		String sql = "select * from (select ROWNUM rnum, n.* from (select * from notice order by pin desc, notice_no desc) n)
+		where rnum >= ? and rnum <= ?";
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, start);
+			pstmt.setInt(2, end);
+			rs = pstmt.executeQuery();
+			if (rs.next()) {
+				do {
+					vo = new NoticeVO();
+					vo.setNotice_no(rs.getInt("notice_no"));
+					vo.setId(rs.getString("id"));
+					vo.setNotice_count(rs.getInt("notice_count"));
+					vo.setNotice_title(rs.getString("notice_title"));
+					vo.setNotice_contents(rs.getString("notice_contents"));
+					vo.setNotice_write_date(rs.getDate("notive_write_date"));
+					list.add(vo);
+				} while (rs.next());
+			}
+		} finally {
+			close(rs, pstmt);
+		}
+		return list;
+	}
+```
+noticeList.jsp
+```jsx
+	<!--페이징 숫자-->
+			<div class="pagediv">
+				<c:if test="${startPage != endPage}">
+					<c:forEach varStatus="s"  begin="${startPage}" end="${endPage}" step="1">
+						<a href="noticeList.do?pageNum=${s.count}">${s.count}</a>	
+					</c:forEach>
+				</c:if>
+			</div>
+```
+게시판 페이징을 위한 소스코드입니다. 글 목록은 DB의 pin이라는 컬럼을 0과 1로 제약조건을 걸어준 후, 체크가 된(=1)인 게시글을 먼저 정렬한 후, 날짜별로 정열하여 고정글이 최상단으로 올 수 있게 구현하였습니다. 
+또한 고정글은 최대 5개까지만 설정할 수 있도록하여, 무분별한 고정글로 인해 가독성이 떨어지는 것을 방지하였습니다. 고정글 개수 카운트는 아래와 같이 작성하였습니다. 
+noticeWrite.jsp
+
+```jsx
+<script type="text/javascript">
+function goRegister(){
+	var count = $('#count').val();
+	
+	if($('#count').val() < 5 || document.getElementById("pin").checked == false){
+		var frm = document.write;
+		frm.action = "<%=ctxPath%>/noticeWrite.do";
+		frm.method = "post";
+		frm.submit();		 
+	}
+	else {
+		alert("고정글은 다섯개만 등록할수 있습니다.");
+	}
+}
 </script>
 ```
-gtag로 화면 전환시 로딩 페이지를 보여주었습니다. 
+```jsx
+	<tr>
+		<th>고정글</th>
+			<td  id = 'fix' style="width: 14px;"><input type="checkbox" name="pin" id ="pin" value="1" ></td>
+			<th style="float:right"> 
+			<button type="button" id="btnRegister" onclick="goRegister()">등록</button>&nbsp;&nbsp; 
+			<a href="<%=ctxPath%>/noticeList.do" style =" margin-right: 5px;">목록보기</a></th>
+		</tr>
+<input type = "hidden" id = "count" name = "count" value  = "${cnt}">
+```
+게시글을 등록한 후 submit전에 DB에 저장된 pin컬럼의 전체 합이 5가 넘으면 등록이되지 못하고 알림 창이 뜨도록 구현하였습니다. 
+#### 게시글 검색
 
- ```jsx
- function connectWS() {
-		console.log("qqqqqqqqqqq")
-		var ws = new WebSocket("ws://localhost:8090/wefer/replyEcho");
-		console.log("qqqqqqqqqqq 연결됨")
-		socket = ws;
-		ws.onopen = function() {
-			console.log('Info: connection opened.');
-		};
-		ws.onmessage = function(event) {
-			console.log("ReceiveMessage:", event.data + '\n');
-		if ((event.data + '\n').length <= 9){
-			console.log(event.data + '\n');
-         var login_status_name = "#login_status_"+event.data;
-         console.log("지금 로그인중인사람" +login_status_name);
-         // 주소록에서 로그인 된 사람 이름을 녹색
-         $(login_status_name).css('background-color','green');
-         // 아니면 원래 색인 빨강 그대로 유지
+NoticeDAO.java
+```jsx
+	public List<NoticeVO> SearchNotice(Connection conn, String word, int startRnum, int endRnum) {
+		List<NoticeVO> list = new ArrayList<NoticeVO>();
+		String sql = "select * from(select rownum rnum, d.* from "
+				+ "(select * from notice where notice_title like ? order by pin desc, notice_no desc) d) "
+				+ "where rnum >= ? and rnum <= ?";
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, "%" + word + "%");
+			pstmt.setInt(2, startRnum);
+			pstmt.setInt(3, endRnum);
+			rs = pstmt.executeQuery();
+			if (rs.next()) {
+				list = new ArrayList<NoticeVO>();
+				do {
+					NoticeVO vo = new NoticeVO();
+					vo.setNotice_no(rs.getInt("notice_no"));
+					vo.setId(rs.getString("id"));
+					vo.setNotice_count(rs.getInt("notice_count"));
+					vo.setNotice_title(rs.getString("notice_title"));
+					vo.setNotice_contents(rs.getString("notice_contents"));
+					vo.setNotice_write_date(rs.getDate("Notive_write_date"));
+					list.add(vo);
+				} while (rs.next());
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			close(rs, pstmt);
+		}
+		return list;
+	}
+```
+word 라는 String 변수의 값을 제목에서 찾아내어, 해당 게시글의 글번호와, 작성자, 조회수, 제목, 내용, 날짜를 셋해주는 소스코드입니다. 
+List<NoticeVO>형의 메소드로 검색시 글 리스트가 보여지며 글 검색했을 시에도 페이징이 잘 되도록 startRnum과 endRnum변수를 주었습니다. 
+  
+#### 글 작성 (파일업로드)
+공지사항 (notice)페이지의 글 작성은 관리자만 가능하므로 아래와 같이 관리자로그인을 한 경우(memberLev == 3)에만 글작성을 할 수 있도록 구현했습니다. 
+noticeList.jsp
+```jsx
+		<tr>
+			<th colspan="5">
+		 <c:if test="${memberLev eq 3 }">	
+			<a href="noticeFixCount.do">글작성</a>
+			 </c:if>
+			</th>
+		</tr>
+```
+
+noticeWrite.java
+```jsx
+private void execute(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		String id = (String) request.getSession().getAttribute("sessionID");
+		System.out.println(id);
+		NoticeService nService = new NoticeService();
+		String folderPath = getServletContext().getRealPath("/files");
+		MultipartRequest mReq = new MultipartRequest(request, folderPath, 5 * 1024 * 1024, "utf-8",
+				new DefaultFileRenamePolicy());
+		List<String> saveFiles = new ArrayList<String>();
+		List<String> originFiles = new ArrayList<String>();
+		Enumeration<String> files = mReq.getFileNames();
+		while (files.hasMoreElements()) {
+			String name = files.nextElement();
+			String filename = mReq.getFilesystemName(name);
+			String originfilename = mReq.getOriginalFileName(name);
+			saveFiles.add(filename);
+			originFiles.add(originfilename);
+		}	
+		String title = mReq.getParameter("notice_title");
+		String contents = mReq.getParameter("notice_contents");
+		int pin = 0;
+		if (mReq.getParameter("pin") != null){
+		 pin = Integer.parseInt(mReq.getParameter("pin"));
+		}
+		NoticeVO vo = new NoticeVO();
+		if (title != null && contents != null) {
+			vo.setNotice_title(title);
+			vo.setNotice_contents(contents);
+			vo.setNotice_img(saveFiles);
+			vo.setPin(pin);
+			vo.setId(id);
+			int result = nService.writeNotice(id, title, contents, saveFiles, pin);
+			if (result < 0) {
+				response.sendRedirect("<script>alert('오류가 발생했습니다.');</script>");
+				return;
+			}
+		}
+		response.sendRedirect("noticeList.do");
+	}
+```
+NoticeDAO.java
+```jsx
+  public int writeNotice(Connection conn, String id, String title, String contents, List<String> img, int pin) {
+		int result1 = 0;
+		int result2 = 0;
+		String query = "INSERT INTO notice (notice_no, id, notice_title, notice_contents,notice_count, pin)
+		VALUES(notice_no_seq.nextval, ?, ?, ?, 0, ?)";
+		try {
+			pstmt = conn.prepareStatement(query);
+			pstmt.setString(1, id);
+			pstmt.setString(2, title);
+			pstmt.setString(3, contents);
+			pstmt.setInt(4, pin);
+			result1 = pstmt.executeUpdate();
+		} catch (SQLException e) { e.printStackTrace();
+		} finally {
+			close(rs, pstmt);
+		} 
+		if (img == null) {
+			result2 =1;
 		}else {
-			var $socketAlert = $('ul#socketAlert');
-			$socketAlert.html(event.data);
-			$('#dot').css('display','block');
-			$socketAlert.css('display', 'block');
- 		var $socketMessage = $('div#socketMessage'); 
-			$socketMessage.html(event.data); 
- 			$socketMessage.css('display', 'block'); 
-		     setTimeout( function() {
-			       $socketMessage.css('display', 'none');
-			    }, 3000);  
-		};
+		for (int i = 0; i < img.size(); i++) {
+			query = "INSERT INTO tbl_img (img_no, notice_no, img) VALUES(img_seq.nextval, notice_no_seq.currval, ? )";
+			try {
+				pstmt = conn.prepareStatement(query);
+				pstmt.setString(1, (String)img.get(i));
+				result2 = pstmt.executeUpdate();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			} finally {
+				close(rs, pstmt);
+			}
 		}
-		ws.onclose = function(event) {
-			console.log('Info: connection closed.');
-		};
-		ws.onerror = function(err) {
-			console.log('Error:', err);
-		};
-	}
- ```
- 헤더에 웹소켓을 두어 모든 페이지가 로딩 될때마다 소켓을 커넥션하도록 했습니다. 
- if문을 사용하여 연결된 소켓이 로그인을 한 사용자인지, 수신참조되어 알림이 가야하는 사용자인지 구별을 했습니다. 
- 알림이 가는 경우 타임아웃을 3000로 주어 3초동안 알림이 떴다 사라지지만, li태그 안에서는 확인할때까지 유지하도록 했습니다. 
-
- ```jsx
-  $.ajax({
-            url : "${pageContext.request.contextPath}/memeberList",
-            type : "POST",
-            contentType : "application/json; charset=utf-8;",
-            dataType : "json",
-            success : function(data) {
-               for (var i = 0; i < data.length; i++) {   // 주소록
-                  if (data[i].dept_name == '인사팀') {
-                     if ($('.insa').length == 0) {
-                        $('.result').append( '<ul class="insa"><span  style="color:white;">'  + data[i].dept_name  + '</span></ul>');
-                     }
-                  } else if (data[i].dept_name == '경영팀') {
-                     if ($('.gyeonyoung').length == 0) {
-                        $('.result').append( '<ul class="gyeonyoung"><span style="color:white;">'  + data[i].dept_name + '</span></ul>');
-                     }
-                  } else if (data[i].dept_name == '개발팀') {
-                     if ($('.geabal').length == 0) {
-                        $('.result').append( '<ul class="geabal"><span style="color:white;">'  + data[i].dept_name  + '</span></ul>');
-                     }
-                  }
-               }
-               for (var i = 0; i < data.length; i++) {
-                  if (data[i].dept_name == '인사팀') {
-                     if (data[i].status == '퇴근') {
-                        $('.insa').append( '<li value = "' + data[i].name + '" ><a href="#" onclick="location.href=\'/wefer\/personerProfileList.do?addrMemberId='
-                                          + data[i].id + '\'"><img src="${pageContext.request.contextPath}/resources/profileImg/'+data[i].profile+'" style="width:30px; heigh:30px;"> ' + data[i].name  + '('  + data[i].position + ')<div id="login_status_'+data[i].name+'" style="width:7px; height:7px; border-radius:50%; background-color:red;"></div></a></li>');
-                     } else if (data[i].status == '출근') {
-                        $('.insa').append( '<li value = "' + data[i].name + '" ><a href="#" onclick="location.href=\'/wefer\/personerProfileList.do?addrMemberId='
-                                          + data[i].i
-                                         -----생략----
-				},
-				error : function() {
-					alert("restController err");
-				}
-			});
- ```
- ajax로 모든 사용자들의 주소록을 불러왔습니다. 소켓이 연결된 사용자인지 구별하여 온/오프라인 상태를 css를 통해 색을 다르게 지정하였습니다. 
-
-
-#### apprdetail.jsp
- ```jsx
-<div class="container">
-		<h6 class="weight-400 d-flex">
-		<i class="icon-copy dw dw-checked mr-2" data-color="#1b00ff"></i>
-		<c:if test="${payment_id.conference.conference_title != null}">
-		${payment_id.conference.conference_title}
-</c:if>
-									
-<c:choose>
-	<c:when
-	test="${payment_id.conference.conference_contents == null}">
-	<td>${payment_id.annual_content}</td>
-	</c:when>
-	<c:otherwise>
-		<td>${payment_id.conference.conference_contents}</td>
-	</c:otherwise>
-        </c:choose>
-	</h6>
-</div> 
- ```
- jstl 사용하여 view에 출력하였습니다. 또한 if문에 해당하는 c태그를 사용하여 값 제어를 했습니다.  
-
-#### apprform.jsp
- ```jsx
-		$('#prj-add-project').on('click', function(evt) {
-			console.log('수신자 클릭하면');
-			var member_list = $(".setting-name").get();
-			console.log("member_list.length:" + member_list.length);
-			var members_id = $(
-			"input[name=members_id][type=hidden]")
-			.get();
-			console.log("members_id.length:" + members_id.length);
-			for (var i = 0; i < member_list.length; i++) {
-				console.log("$(member_list[i]).val(): " + $(member_list[i]).val());
-				var memberId = $(members_id[i]).val();
-				console.log("memberId" + memberId);
-				if (socket) {
-					var socketMsg = "전자결재," + memberId;
-					console.log("sssssssmsg>>", socketMsg)
-					socket.send(socketMsg);
-				}
-			 else {
-				console.log("Error on editReply>>", res);
-			}
-			
-		};
-		});
- ```
- 전자결재를 승인해 줄 승인 참조자에게 알림을 보내기 위해 소켓을 사용한 코드입니다. 
-
- #### chat.jsp
-  ```jsx
-  		<!-- 웹소켓 js -->
-		<script type="text/javascript">
-			var ws;
-			var messages = document.getElementById("messages");
-			var flag = true;
-			function openSocket(name, photo) {
-				$('#yes').css('display', 'block');
-				$('#no').css('display', 'none');
-				var c = confirm(name+"님과 채팅을 시작하시겠습니까?");
-				var chatM = $('.name').append('<h3 id = "name">'+name+'</h3>');
-					$('.photo').append('<img src="${pageContext.request.contextPath}/resources/profileImg/'+photo+'" style="width:50px; height:50px;">'); 
-					var chatmem = "대화에 초대," + "[" +name+ "]";
-					console.log("chhhhhhhhhhasmsg>>", chatmem)
-					socket.send(chatmem);
-				if (ws !== undefined && ws.readyState !== WebSocket.CLOSED) {
-					writeResponse("대화는 한명씩만 가능합니다. 대화를 먼저 종료해주세요.");
-					return;
-				}
-				//웹소켓 객체
-				ws = new WebSocket("ws://localhost:8090/wefer/wecho.do");
-				ws.onopen = function(event) {
-					if (event.data === undefined) {
-						return;
-					}
-					writeResponse(event.data);
-				};
-				ws.onmessage = function(event) {
-					console.log(event.data)
-					writeResponse(event.data);
-				};
-				ws.onclose = function(event) {
-					writeResponse("상대방이 대화를 종료했습니다.");
-					 function clearText(){
-				            console.log(messages.parentNode);
-				            messages.parentNode.removeChild(messages)
-				      	}
-				}
-			}
-			function enterkey() {
-		        if (window.event.keyCode == 13) {
-		        	sent()
-		        }
 		}
-			function sent() { // 보내는 사람만 들어감 
-				var today = new Date();  
-				var text = document.getElementById("messageinput").value 
-				ws.send(text);
-				document.getElementById("messageinput").value = "";
-				console.log("sent에 들어오면 보내는거 받는사람은 안들어옴 " + text);
-				if (flag == true){
-					messages.innerHTML +=  // 오른쪽에 나와야함 
-					"<li class=\"clearfix admin_chat\" style = \"list-style: none;\"><span class=\"chat-img\">\r\n" + 
-	        		"<img src=\"vendors/images/chat-img2.jpg\" style = \"display: none;\" alt=\"\">\r\n" + 
-	        		"</span>\r\n" + 
-	        		"<div class=\"chat-body clearfix\"><p>"+ text +"</p><div class=\"chat_time\">"+today.toLocaleTimeString()+"</div>\r\n" + "</div></li>"
-	        		flag = false;
-					  $("#scroll").scrollTop($("#scroll")[0].scrollHeight);
-					  console.log($("#scroll")[0].scrollHeight);
-				}
-			}
-			function writeResponse(text) {
-				var today = new Date();   
-				var sessionid = "${loginName}";  // 로그인한 사람
-				var sender =  document.getElementById("sender").value; // 지금 글 보낸 사람 
-				if (sessionid == sender && flag == true){
-				console.log(today.toLocaleTimeString());	
-					messages.innerHTML +=  // 왼쪽
-						"<li class=\"clearfix \" style = \"list-style: none;\"><span class=\"chat-img\">\r\n" + 
-		        		"<img src=\"vendors/images/chat-img2.jpg\" style = \"display: none;\" alt=\"\">\r\n" + 
-		        		"</span>\r\n" + 
-		        		"<div class=\"chat-body clearfix\"><p style = \"display: inline-block;\">"+ text +"</p><div class=\"chat_time\">"+today.toLocaleTimeString()+"</div>\r\n" + "</div></li>"
-						  $("#scroll").scrollTop($("#scroll")[0].scrollHeight);
-				}flag = true;
-			}
-			function closeSocket() {
-				var c = confirm("채팅창을 닫겠습니까?");
-		   
-				$('.photo').empty();
-				$('.name').empty();
-				if (c){
-					$('#yes').css('display', 'none');
-					$('#no').css('display', 'block');
-					
-					ws.onclose();
-				}
-		}
-		</script>
-  ```
- 주고받는 메세지를 출력하는 소스입니다. 핸들러를 통해 writeResponse함수안으로 들어오는 모든 메세지는 한꺼번에 출력되어,
- 받은 메세지와 보낸 메세지를 구별하는 것이 어려웠습니다. 따라서 flag를 사용해 flag가 flase인경우에는 writeResponse에 메세지가 들어오더라도 출력이 되지 않도록 구현했습니다.
- 또한 Date()객체를 사용해 현재시간을 출력하였습니다. 
-
-#### DB 
- ![Display_3](https://user-images.githubusercontent.com/69295153/106435685-8bf75600-64b6-11eb-81c4-ad88c39d3b55.png)
- payment_confirm테이블과 payment_comment테이블은 payment테이블의 payment_id가 외래키로 있으며 해당 게시글을 들어갔을때 출력되는 테이블입니다. 
- annual테이블과 conference테이블은 작성자 id로 외래키가 걸려있으며, 작성자 id는 멤버테이블의 컬럼입니다. 
- anuual테이블 혹은 conference테이블에서 글을 작성했을시 작성자 id가 payment테이블의 id에 등록되며, 자동으로 payment_id시퀀스가 증가합니다. 
- payment를 작성했을시 결재를 참조해줄 참조자 3인이 payment_confirm테이블의 S_member에 각각 들어가며, 한명이 승인을 해줄때마다 confrim의 값이 +2가되어 confirm 컬럼의 값이 6이되면
- payment의 status가 진행중에서 승인으로 update됩니다.  
-
-```jsx
-<select id="paymentList" resultType="arraylist"
-		parameterType="string" resultMap="resultPayment">
-		select c.conference_title, p.id,
-		p.payment_item, p.payment_status,c.conference_date, p.conference_id, p.annual_id, p.payment_id, p.write_date,m.name
-		from payment p
-		left outer
-		join conference c
-		on
-		c.conference_id = p.conference_id
-		left outer join
-		annual a
-		on
-		a.annual_id = p.annual_id
-		left outer join member m
-		on
-		m.id = p.id
-		where exists (select 1
-		from member
-		where member.id = p.id
-		and member.id = #{id})
-	</select>
-	<select id="receive-paymentList" resultType="arraylist"
-		parameterType="string" resultMap="resultPayment">
-		select c.conference_title, p.id,
-		p.payment_item, p.payment_status,c.conference_date, p.conference_id, p.annual_id, p.payment_id, p.write_date,m.name
-		from payment p
-		left outer join
-		conference c
-		on
-		c.conference_id = p.conference_id
-		left outer join
-		annual a
-		on
-		a.annual_id = p.annual_id
-		left outer join member m
-		on
-		m.id = p.id
-		where p.payment_id in (select pc.payment_id
-		from payment_confirm pc
-		where pc.S_MEMBER_ID0 = #{name}
-		or pc.S_MEMBER_ID1 =#{name} or
-		pc.S_MEMBER_ID2 =#{name}
-		)
-	</select>
-```
-로그인한 사용자가 작성하거나, 수신받은 결재리스트를 뽑아오는 쿼리문입니다. paymentList에서는 현재 로그인한 사용자가 발신한 모든 결재를 출력하며, receive-paymentList에서는 payment-confirm테이블에 로그인한 사용자의 이름이 하나라도 있는 경우 출력하는 쿼리문입니다. 
-
-```jsx
-	<update id="confirmCnt" parameterType="Payment"
-		statementType="PREPARED">
-		update
-		payment_confirm set payment_confirm.confirm =
-		payment_confirm.confirm+(
-		SELECT sum (a)
-		from
-		(select
-		(count(S_MEMBER_ID0)) as a from payment_confirm where s_member_id0 =
-		#{name} and payment_id=#{payment_id}
-		union all
-		select
-		(count(S_MEMBER_ID1))
-		from payment_confirm where s_member_id1 =
-		#{name}
-		and payment_id=#{payment_id}
-		union all
-		select
-		(count(S_MEMBER_ID2))
-		from payment_confirm where
-		s_member_id2 =
-		#{name} and
-		payment_id=#{payment_id}))where
-		payment_id=#{payment_id}
-	</update>
-	
-	<update id="status" parameterType="Payment"
-		statementType="PREPARED">
-		update payment set payment_status = (select case when
-		confirm >= 6 then '승인'
-		else '진행중' end
-		from (select confirm from
-		payment_confirm
-		where payment_id=#{payment_id} )) where
-		payment_id=#{payment_id}
-	</update>
-```
-결재 승인여부를 확인하고 상태를 변경하는 쿼리문입니다. S_member가 한명씩 승인할때마다 2씩카운트를하며 전체의 총합이 6이되면 진행중에서 승인으로 변경되도록 했습니다. 
-```jsx
-<insert id = "annualInsert" parameterType="Annual"
-		flushCache="true" statementType="PREPARED">
-      <selectKey resultType="string" keyProperty="id" order="BEFORE">
-         select id from member where id = #{id}
-      </selectKey>
-		insert into annual (annual_id, annual_content, annual_stddate, annual_enddate, annual_kind,id)
-		values (#{annual_id},
-		#{annual_content},
-		#{annual_stddate},
-		#{annual_enddate},
-		#{annual_kind},
-		#{id})
-	</insert>
-	<select id = "seqAnnualPayment" resultType="string">
-		select SEQ_PAYMENT_ANNUAL.nextval from dual
-	</select>
-```
-annual인서트시, 로그인한 사용자의 아이디 값과, 외래키로 적용되어있는 payment_id를 모두 파라메터로 들고가야하는 애로사항이 있었습니다. 
-따라서 insert시 SEQ_PAYMENT_ANNUAL 시퀀스만을 select한후 아래와 같이 DAO와 Sevice에서 적용시켰습니다. 
-#### AnnualDao.java
-```jsx
-	public String seqAnnualPayment() {
-		String seqAnnualPayment = sqlSession.selectOne("AnnualMapper.seqAnnualPayment");
-		return seqAnnualPayment;
-	}
-```
-AnnualService.java
-```jsx
-public int insertAnnualPayment(Annual a, Payment b) {
-		String seq = aDao.seqAnnualPayment();
-		a.setAnnual_id(seq);
-		b.setAnnual_id(seq);
-		
-		String seqc = pmDao.seqPayment();
-		b.setPayment_id(seqc);
-		
-		int resultA = aDao.insertAnnual(a);
-		int resultB= pmDao.insertPayment(b);
-		int resultC= pcDao.insertPaymentConfirm(b);
-		
-		if(resultA==1 || resultB==1 || resultC==1)
+		if (result1 != 0 || result2 != 0 ) 
 			return 1;
-		else
-			return 0;
+			else return 0;
 	}
 ```
-#### EchoHandler.java
 ```jsx
-public class ReplyEchoHandler extends TextWebSocketHandler {
-	// 모든 사용자
-	List<WebSocketSession> sessions = new ArrayList<WebSocketSession>();
-	// 로그인중인 개별유저
-	Map<String, WebSocketSession> users = new ConcurrentHashMap<String, WebSocketSession>();
-	// 클라이언트가 서버로 연결시
-	@Override
-	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-		System.out.println("커넥션됐니  :" + session);
-		sessions.add(session); // 로그인한 세션아이디가 들어감
-		log(session.getId() + "연결됨 / 알림소켓 ");
-		String senderId = getMemberId(session); 
-		if (senderId != null) { // 로그인 값이 있는 경우만
-			log(senderId + " 연결 됨");
-			users.put(senderId, session); // 로그인중인 유저 저장
-			for (WebSocketSession sess : sessions) {
-					sess.sendMessage(new TextMessage(senderId));
-			}
+public int DeleteNotice(Connection conn, int no) {
+		String sql = "DELETE FROM notice WHERE notice_no = ?";
+		int result = 0;
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, no);
+			result = pstmt.executeUpdate();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			close(rs, pstmt);
 		}
-	}
-	// 클라이언트가 Data 전송 시
-	@Override
-	protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-		System.out.println("핸들러 텍스트 메세지 :" + session + ":" + message.getPayload());
-		String sender = getMemberId(session);
-		String msg = message.getPayload();
-		if (msg != null) {
-			String[] strs = msg.split(",");
-			if (strs != null && strs.length == 2) {
-				String cmd = strs[0];
-				String target = strs[1]; // m_id 저장
-				log(cmd);
-				log(target);
-				for (WebSocketSession sess : sessions) {
-					if (cmd.equals("대화에 초대")) {
-						sess.sendMessage(new TextMessage("<li><a href='./chat.do' style = \"color: blue;\" >"
-								+ sender + "님이 " + cmd + "했습니다</a></li>"));
-					}
-					WebSocketSession targetSession = users.get(target); // 수신을 받을 세션 
-					// 실시간 접속
-					if (targetSession != null) {
-						System.out.println("실시간 접속했나");						
-						if (true) {
-							if (cmd.equals("전자결재")) {
-								TextMessage tmpMsg = new TextMessage("<li><a href='./approval.do' style = \"color: blue;\" >"
-										+ sender + "님이 " + cmd + "를 등록했습니다</a></li>");
-								targetSession.sendMessage(tmpMsg);
-								
-							}else {
-								TextMessage tmpMsg = new TextMessage("<li><a href='./projectlist.do' style = \"color: blue;\" >"
-										+ sender + "님이 " + cmd + "를 등록했습니다</a></li>");
-								targetSession.sendMessage(tmpMsg);
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	// 웹소켓에 id 가져오기
-	// 접속한 유저의 http세션을 조회하여 id가져오기
-	private String getMemberId(WebSocketSession session) {
-		Map<String, Object> httpSession = session.getAttributes();
-		String m_name = (String) httpSession.get("loginName"); // 세션에 저장된 m_id 기준 조회
-		if (m_name == null)
-		return m_name == null ? null : m_name;
+		return result;
 	}
 ```
-사용자가 접속했다면 모든 사용자에게 접속중임을 알리며, 수신 참조자로 선택됐을시에는 해당 사용자에게만 알림을 보내는 소스 코드입니다. 
+글 작성시 이미지를 등록할 수 있습니다. 이미지를 등록하지 않았다면 notice테이블에 글만 인서트되며 이미지가 null이 아닐시에는 tbl_img에 해당 이미지를 인서트합니다. 
+하나의 글 번호에 이미지가 여러장 입력될 시, 이미지의 사이즈만큼 쿼리문을 수행하며 이미지를 셋해줍니다.
+이미지가 등록에 실패했다면 글 등록도 실패합니다. 
+
+
+## 작동 영상
+간단한 작동 영상입니다. 
+[![예제](https://img.youtube.com/vi/hPoQP96emqs/0.jpg)](https://youtu.be/hPoQP96emqs) 
