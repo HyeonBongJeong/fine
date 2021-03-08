@@ -132,7 +132,6 @@ protected void doGet(HttpServletRequest request, HttpServletResponse response) t
 	
 	}
 ```
-
 - FindDAO.java
 ```jsx
 	//입양 유기견 가져오기 메서드 DAO
@@ -211,6 +210,9 @@ protected void doGet(HttpServletRequest request, HttpServletResponse response) t
 		return result;
 	}
 ```
+- 입양할 유기견을 보여주는 메서드 입니다.
+- 무분별한 입양을 막기 위해 세션을 체크하여 로그인 정보가 없다면 접근하지 못하게 코딩하였습니다.
+- 그리고 처음 불러오는 리스트는 처음 회원가입시에 선호하는 견종을 고르게 되는데 아무런 검색정보가 없다면 자신이 선호하는 견종위주로 가져오게 코딩하였습니다.
 
 #### 입양 게시판 페이징(검색)
 - Find_Adopt_Search.java
@@ -296,6 +298,60 @@ protected void doGet(HttpServletRequest request, HttpServletResponse response) t
 	
 	}
 ```
+- fine_find_Adopt_search.jsp kakaoMap api script
+```jsx
+var mapContainer = document.getElementById('map'), // 지도를 표시할 div  
+mapOption = { 
+    center: new kakao.maps.LatLng(36.991879423239666, 128.03755800986698), // 지도의 중심좌표
+    level: 13 // 지도의 확대 레벨
+};
+
+var map = new kakao.maps.Map(mapContainer, mapOption); // 지도를 생성합니다
+//확대 축소
+var zoomControl = new kakao.maps.ZoomControl();
+map.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT);
+var geocoder = new kakao.maps.services.Geocoder();
+//마커를 표시할 위치와 title 객체 배열입니다 
+var positions = document.getElementsByClassName('address');
+var careName = document.getElementsByClassName('careName');
+	for(var i=0; i<=positions.length; i++){
+	console.log(positions[i]);	
+		
+	}
+	
+	for (var i=0; i < positions.length ; i++) {
+		geocoder.addressSearch(positions[i].innerText, function(result, status) {
+
+		    // 정상적으로 검색이 완료됐으면 
+		     if (status === kakao.maps.services.Status.OK) {
+
+		        var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+
+		        // 결과값으로 받은 위치를 마커로 표시합니다
+		        var marker = new kakao.maps.Marker({
+		            map: map,
+		            position: coords
+		        });
+
+		        // 인포윈도우로 장소에 대한 설명을 표시합니다
+		       
+		        var infowindow = new kakao.maps.InfoWindow({
+		            content:  '<div style="width:150px;text-align:center;padding:6px 0;"><a href="https://map.kakao.com/link/to/'+careName[i]+',' +coords.Ma+','+ coords.La+'" style="color:blue" target="_blank">길찾기</a></div>'
+		        });
+		        kakao.maps.event.addListener(marker, 'click', function() {
+		            // 마커 위에 인포윈도우를 표시합니다
+		            infowindow.open(map, marker);  
+		      });
+		       
+				
+
+		        // 지도의 중심을 결과값으로 받은 위치로 이동시킵니다
+		    } 
+		})
+
+
+		}; 
+```		
 - FindDAO.java
 ```jsx
 //입양 할 유기견 검색 메서드
@@ -330,8 +386,8 @@ protected void doGet(HttpServletRequest request, HttpServletResponse response) t
 		return cnt;
 	}
 ```
-
-
+- 위의 리스트 불러오는 것과 마찬가지로 검색어를 가지고 DB에서 값을 불러옵니다.
+- 리스트에서 불러온 유기견의 시/도 정보를 카카오 api에도 뿌려줍니다.
 #### 입양 유기견 상세정보
 ![rDetail](https://user-images.githubusercontent.com/59170160/110350194-cdab8b80-8076-11eb-81c7-bac0ac61e7fe.png)
 ![rDetailMap](https://user-images.githubusercontent.com/59170160/110350165-c8e6d780-8076-11eb-9fbf-12fdf3cfa8ea.png)
@@ -409,7 +465,7 @@ protected void doGet(HttpServletRequest request, HttpServletResponse response) t
 		return list;
 	}
 ```
-
+- 유기된 유기견의 리스트 중 글번호를 가지고 유기견의 상세정보를 가져와 화면에 뿌려주는 데 이때 리스트에서 처럼 카카오 api를 사용하여 위치정보도 나타내어 줍니다.
 #### 입양 페이지 이동할 때 회원 등급 체크
 - Find_Reservation.java
 ```jsx
@@ -548,6 +604,8 @@ protected void doGet(HttpServletRequest request, HttpServletResponse response) t
 		return list;
 	}
 ```
+- 입양예약 페이지로 이동하기 전에 회원의 등급을 먼저 체크 한 후에 기준 미달이라면 퀴즈 화면으로 넘어가게 코딩하였습니다.
+- 기준에 준하면 회원의 정보와 유기견의 정보를 가지고 예약 페이지로 이동하게 구현하였습니다.
 #### 입양 정보
 ![mResernavtion](https://user-images.githubusercontent.com/59170160/110350192-cdab8b80-8076-11eb-87f3-29ec055aad01.png)
 - Find_Reservation_Adopt.java
@@ -665,6 +723,9 @@ protected void doGet(HttpServletRequest request, HttpServletResponse response) t
 		return result;
 	}
 ```
+- 회원의 등급이 기준에 준하면 입양 예약을 할 수 있는데 예약 form에서 넘어온 정보를 가져옵니다.
+- 날짜를 JdatePicker로 가져와 비어있는 지, 예약한 사람이 있는지 Calender 메서드를 활용하여 날짜 비교 후 모든 검증이 통과되면 예약을 할 수 있도록 구현하였습니다. 
+- 
 #### 입양 관련 서류 다운로드
 ![rReservationOk](https://user-images.githubusercontent.com/59170160/110350169-ca180480-8076-11eb-8c77-8cd9c20d052d.png)
 - Find_document_down.java
@@ -702,8 +763,9 @@ protected void doGet(HttpServletRequest request, HttpServletResponse response) t
 				bin.close();
 	}
 ```
+- 입양예약이 완료 된 후 필요 서류를 지참해야 함으로 서류 다운로드 기능을 구현하였습니다.
+- ServletOutputStream 으로 다운받을 파일 명을 입력하고 인코딩 처리 후 다운이 되게끔 구현하였습니다.
 ### 잃어버린 유기견 리스트 
-
 ![findList](https://user-images.githubusercontent.com/59170160/110350175-cab09b00-8076-11eb-8fd4-dc33986fc48d.png)
 ![findSearch](https://user-images.githubusercontent.com/59170160/110350178-cb493180-8076-11eb-9872-70d9b21e3992.png)
 - Find_Lists.java
@@ -771,6 +833,7 @@ protected void doGet(HttpServletRequest request, HttpServletResponse response) t
 	}
 
 ```
+- 유기견 입양 기능과 동일하지만 찾는 기능은 입양이 아니므로 비회원도 찾을 수 있도록 구현하였습니다.
 - FindDAO.java
 ```jsx
 //페이징을 위한 데이터 개수 세는 메서드
@@ -837,7 +900,7 @@ protected void doGet(HttpServletRequest request, HttpServletResponse response) t
 
 	}
 ```
-
+- 유기견 입양 기능과 동일
 ### 잃어버린 유기견 리스트(검색) 
 - Find_Search.java
 ```jsx
@@ -919,6 +982,7 @@ protected void doGet(HttpServletRequest request, HttpServletResponse response) t
 		dis.forward(request, response);
 	}
 ```
+
 - FindDAO.java
 ```jsx
 //유기견 찾기 검색 리스트 갯수 세는 메서드
@@ -1001,6 +1065,7 @@ public int getSearchBoardCount(String address, String dogKind, String happenDt, 
 
 	}
 ```
+- 유기견 입양 기능과 동일
 ### 잃어버린 유기견 상세 정보 
 ![findDetail](https://user-images.githubusercontent.com/59170160/110350174-cab09b00-8076-11eb-8a8b-47ebd9e94c2e.png)
 ![fineDetailMap](https://user-images.githubusercontent.com/59170160/110350180-cb493180-8076-11eb-8c5f-ef2e22027f06.png)
@@ -1067,6 +1132,7 @@ public int getSearchBoardCount(String address, String dogKind, String happenDt, 
 		return list;
 	}
 ```
+- 유기견 입양 기능과 동일
 ### 제휴 보호소 관리자 별 보호중인 유기견 목록 
 
 ![mnageLsit](https://user-images.githubusercontent.com/59170160/110350188-cd12f500-8076-11eb-8d97-f15aefcf462d.png)
@@ -1185,6 +1251,8 @@ public int getSearchBoardCount(String address, String dogKind, String happenDt, 
 		return list;
 	}
 ```
+- 제휴를 맺은 보호소들이 보호중인 유기견의 리스트를 보여줍니다.
+- 유기견 입양 리스트와 기능은 동일합니다.
 ### 입양되거나 찾은 유기견 삭제 메서드
 
 - Find_manage_delete.java
@@ -1229,6 +1297,7 @@ public int getSearchBoardCount(String address, String dogKind, String happenDt, 
 	
 	}
 ```
+
 - FindDAO.java
 ```jsx
 //유기견 주인이 찾은 유기견 삭제 메서드
@@ -1247,6 +1316,8 @@ public int getSearchBoardCount(String address, String dogKind, String happenDt, 
 		return result;
 
 	}
+```
+- 자신의 보호소 안에 있는 유기견이 입양되거나 주인을 찾는다면 관리자가 해당 유기견의 정보를 삭제하는 메서드 입니다.
 ### 보호소에 들어온 유기견 입력 
 
 ![manageWrite](https://user-images.githubusercontent.com/59170160/110350187-cc7a5e80-8076-11eb-81d0-35f6b74a9856.png)
@@ -1381,6 +1452,9 @@ public int getSearchBoardCount(String address, String dogKind, String happenDt, 
 		return result;
 	}
 ```
+- 보호소 관리자가 자신의 보호소로 들어온 유기견을 등록시키는 메서드입니다.
+- MultipartRequest 로 form에 입력된 유기견의 사진을 가져와 DB에 저장하고 서버에 이미지를 등록하도록 구현하였습니다.
+
 
 
 
@@ -1655,6 +1729,13 @@ public class XmlParser {
 
 	}
 ```
+- 먼저 저장될 XML파일을 지정합니다.
+- 공공 api 데이터를 가져오기 위해 URL 메서드에 주소를 적고 HttpURLConnection 으로 연결을 하였습니다
+- 이후 BufferedReader로 응답된 값을 읽은 후에 XPathExpression으로 어느노드를 읽을지 정하고 NodeList로 값을 읽어옵니다.
+- 그 이후 NodeList하나 더 선언해 이 전 선언했던 NodeList의 자식노드들을 읽어와 BufferedWriter에 전에 지정한 파일에 적어주게 됩니다.
+- 그리고 Dao에서 XmlParser로 넘길 파일을 정하고 넘겨줍니다.
+- XmlParser에서 xml파일에 있는 노드들을 VO에 저장한 후 VO를 다시 호출하여 저장합니다.
+- 저장할 때 DB에서 저장된 값을 모두 불러와 먼저 xml파일에 있는 데이터를 비교해 전에 있던 데이터라면 저장하지 않고 새로운 데이터만 저장하도록 구현하였습니다.
 ### 보호소 직원 입양현황 리스트 가져오기
 
 ![manageReservationLsit](https://user-images.githubusercontent.com/59170160/110350182-cbe1c800-8076-11eb-936e-8dcade9cabd0.png)
@@ -1723,6 +1804,8 @@ public class XmlParser {
 		return list;
 	}
 ```
+- 관리자 페이지에서 유기견을 입양 예약한 정보를 불러오는 메서드 입니다.
+- 예약 리스트가 비어있다면 PrintWriter 입양 예약현황이 없다는 경고창의 띄워주도록 코딩하였습니다.
 ### 메인 페이지 한주간 유기된 유기견 리스트
 ![main](https://user-images.githubusercontent.com/59170160/110350181-cbe1c800-8076-11eb-9cb5-26bc0eb54e01.png)
 - Find_HowMany.java
@@ -1789,4 +1872,17 @@ public class XmlParser {
 }
 
 ```
+index.jsp
+```jsx
+	<c:if test="${not empty count }">
+	      <div class="temporary2">최근 한주간 유기된의 유기견의수는 ${count }마리입니다.</div>
+	</c:if>
+	      <div class="temporary3">
+	<c:if test="${not empty list }">
+		<c:forEach items="${list }" var="mvo" step="1">
+			<div class="dogPic"><a href="<%=ctxPath%>/findDetail.do?no=${mvo.desertionNo}"><img src="${mvo.popfile }" style="width:380px; height: 350px;"></a></div>
+		</c:forEach>
+      	</c:if>
+- 한주동안 유기된 유기견의 수를 가져와 화면에 뿌려주고 유기견의 사진을 들고와 보여주도록 jstl을 활용하여 구연하였습니다.
+- 사진을 누르면 해당 유기견의 상세 정보를 볼 수 있도록 상세 페이지로 이동하게 구현하였습니다.
 
