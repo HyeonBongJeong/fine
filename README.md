@@ -34,10 +34,11 @@
 
 ## 👩‍💻 Member 
 
-#### 오승하
-- 공지사항 기능 전체(notice)
-- 글 작성시 고정글 설정 선택가능, 최상단에 위치
-- 파일업로드
+#### 정현봉
+- 유기견(입양, 찾기) 기능
+- 파일 업,다운로드
+- 공공 api사용하여 유기견의 목록 불러오기
+- 유기견 입양 예약 기능
 
 
 ##  🔧 개발순서
@@ -55,288 +56,1552 @@
 ![Untitled Diagram](https://user-images.githubusercontent.com/69295153/106564533-ae4daa00-6570-11eb-8ce7-e412ecd999c2.png)
 
 ### 주요소스 
-#### 게시판 페이징
-noticeList.jsp
+#### 입양 게시판 페이징
+Find_Adopt_List.java
 ```jsx
-public int UpdateNotice(Connection conn, String title, String content, int no , List<String> img) {
-		String sql = "update notice set notice_title = ?, notice_contents = ?" + " where notice_no = ?";
-		int result = 0;
-		int result2 = 0;
-		try {
-			pstmt = conn.prepareStatement(sql);
-			pstmt.setString(1, title);
-			pstmt.setString(2, content);
-			pstmt.setInt(3, no);
-			result = pstmt.executeUpdate();
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			close(rs, pstmt);
+protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		request.setCharacterEncoding("UTF-8");
+		response.setContentType("text/html; charset=UTF-8");
+		String ctx = request.getContextPath();
+	String id = (String) request.getSession().getAttribute("sessionID");
+		System.out.println(id);
+		if(request.getSession().getAttribute("sessionID") == null) {
+			PrintWriter out = response.getWriter();
+			out.append("<script>alert('로그인 후 이용해 주세요')</script>");
+			out.println("<script>location.href='"+ctx+"/findHowMany.do'</script>"); 
+		}else {
+			FindService fService = new FindService();
+			List<FindVO> list = new ArrayList<FindVO>();
+			 
+				int pageSize = 10; // 페이지당 읽어올 글수
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+				int pageBlock = 10;
+			
+
+			int count = fService.getAdoptListCount();	
+			System.out.println(count);
+			String pageNum = request.getParameter("pageNum");
+			if (pageNum == null) {
+				pageNum = "1";
+			}
+			int currentPage = Integer.parseInt(pageNum);
+
+
+			int pagecount = (count / pageSize) + (count % pageSize == 0 ? 0 : 1);
+			int startPage = 1;
+			int endPage = 1;
+			if (currentPage % 10 == 0) {
+
+				startPage = ((currentPage / 10) - 1) * pageBlock + 1;
+			} else {
+				startPage = ((currentPage / 10)) * pageBlock + 1;
+			}
+
+			endPage = startPage + pageBlock;
+			if (endPage > pagecount) {
+				endPage = pagecount;
+			}
+			 
+			
+
+			
+
+			int startRnum = (currentPage - 1) * pageSize + 1;
+			int endRnum = startRnum + pageSize - 1;
+			
+			
+			
+			request.setAttribute("currentPage", currentPage); 
+			request.setAttribute("count", count);
+			request.setAttribute("endPage", endPage);
+			request.setAttribute("startPage", startPage);
+			
+			request.setAttribute("pagecount", pagecount);
+			
+			list = fService.getFindAdoptInfo(id, startRnum, endRnum);
+			System.out.println("안녕히세여 :" + list);
+			request.setAttribute("list", list);
+			
+			RequestDispatcher dis = request.getRequestDispatcher("./view/find/fine_find_Adopt_List.jsp");
+			dis.forward(request, response);
 		}
-		for (int i = 0; i < img.size(); i++) {
 		
-			sql = "update tbl_img set img = ? where notice_no = ? ";
-			try {
-				pstmt = conn.prepareStatement(sql);
-				pstmt.setString(1, (String)img.get(i));
-				pstmt.setInt(2, no);
-				System.out.println(img);
-				result2 = pstmt.executeUpdate();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			} finally {
-				close(rs, pstmt);
-			}
-		}
-		if (result != 0 && result2 != 0 ) 
-			return 1;
-			else return 0;
-	}
-```
-NoticeDAO.java
-```jsx
-	// 공지사항 목록 페이징 - 공지사항 총 글 개수
-	public int getBoardCount(Connection conn) throws SQLException {
-		int cnt = 0;
-		String sql = "select COUNT(*) from notice";
-		try {
-			stmt = conn.createStatement();
-			rs = stmt.executeQuery(sql);
-			if (rs.next()) {
-				cnt = rs.getInt(1);
-			}
-		} finally {
-			close(rs, pstmt);
-		}
-		return cnt;
-	}
-
-	// 공지사항 목록
-	public List<NoticeVO> getBoardPage(Connection conn, int start, int end) throws SQLException {
-		List<NoticeVO> list = new ArrayList<NoticeVO>();
-		NoticeVO vo = null;
-		String sql = "select * from (select ROWNUM rnum, n.* from (select * from notice order by pin desc, notice_no desc) n)
-		where rnum >= ? and rnum <= ?";
-		try {
-			pstmt = conn.prepareStatement(sql);
-			pstmt.setInt(1, start);
-			pstmt.setInt(2, end);
-			rs = pstmt.executeQuery();
-			if (rs.next()) {
-				do {
-					vo = new NoticeVO();
-					vo.setNotice_no(rs.getInt("notice_no"));
-					vo.setId(rs.getString("id"));
-					vo.setNotice_count(rs.getInt("notice_count"));
-					vo.setNotice_title(rs.getString("notice_title"));
-					vo.setNotice_contents(rs.getString("notice_contents"));
-					vo.setNotice_write_date(rs.getDate("notive_write_date"));
-					list.add(vo);
-				} while (rs.next());
-			}
-		} finally {
-			close(rs, pstmt);
-		}
-		return list;
-	}
-```
-noticeList.jsp
-```jsx
-	<!--페이징 숫자-->
-			<div class="pagediv">
-				<c:if test="${startPage != endPage}">
-					<c:forEach varStatus="s"  begin="${startPage}" end="${endPage}" step="1">
-						<a href="noticeList.do?pageNum=${s.count}">${s.count}</a>	
-					</c:forEach>
-				</c:if>
-			</div>
-```
-게시판 페이징을 위한 소스코드입니다. 글 목록은 DB의 pin이라는 컬럼을 0과 1로 제약조건을 걸어준 후, 체크가 된(=1)인 게시글을 먼저 정렬한 후, 날짜별로 정열하여 고정글이 최상단으로 올 수 있게 구현하였습니다. 
-또한 고정글은 최대 5개까지만 설정할 수 있도록하여, 무분별한 고정글로 인해 가독성이 떨어지는 것을 방지하였습니다. 고정글 개수 카운트는 아래와 같이 작성하였습니다. 
-noticeWrite.jsp
-
-```jsx
-<script type="text/javascript">
-function goRegister(){
-	var count = $('#count').val();
 	
-	if($('#count').val() < 5 || document.getElementById("pin").checked == false){
-		var frm = document.write;
-		frm.action = "<%=ctxPath%>/noticeWrite.do";
-		frm.method = "post";
-		frm.submit();		 
 	}
-	else {
-		alert("고정글은 다섯개만 등록할수 있습니다.");
-	}
-}
-</script>
 ```
-```jsx
-	<tr>
-		<th>고정글</th>
-			<td  id = 'fix' style="width: 14px;"><input type="checkbox" name="pin" id ="pin" value="1" ></td>
-			<th style="float:right"> 
-			<button type="button" id="btnRegister" onclick="goRegister()">등록</button>&nbsp;&nbsp; 
-			<a href="<%=ctxPath%>/noticeList.do" style =" margin-right: 5px;">목록보기</a></th>
-		</tr>
-<input type = "hidden" id = "count" name = "count" value  = "${cnt}">
-```
-게시글을 등록한 후 submit전에 DB에 저장된 pin컬럼의 전체 합이 5가 넘으면 등록이되지 못하고 알림 창이 뜨도록 구현하였습니다. 
-#### 게시글 검색
 
-NoticeDAO.java
+FindDAO.java
 ```jsx
-	public List<NoticeVO> SearchNotice(Connection conn, String word, int startRnum, int endRnum) {
-		List<NoticeVO> list = new ArrayList<NoticeVO>();
-		String sql = "select * from(select rownum rnum, d.* from "
-				+ "(select * from notice where notice_title like ? order by pin desc, notice_no desc) d) "
-				+ "where rnum >= ? and rnum <= ?";
+	//입양 유기견 가져오기 메서드 DAO
+	public List<FindVO> getFindAdoptInfo(int startRnum, int endRnum, String id, Connection conn, PreparedStatement pstmt,
+			ResultSet rs) {
+		List<FindVO> list = new ArrayList<FindVO>();
+		SimpleDateFormat mSimpleDateFormat = new SimpleDateFormat("yyyyMMdd", Locale.KOREA);
+		Date currentTime = new Date();
+		String mTime = mSimpleDateFormat.format(currentTime);
+		System.out.println(mTime);
+
+		String sql = "select * from(select rownum rnum, d.* from (select * from dog where noticeEdt < " + mTime
+				+ " and reservate = 0 and dog_kind_no = (select dog_kind_no from member where id= ?) order by desertionNo desc) d) where rnum >= ? and rnum <= ?";
 		try {
+
 			pstmt = conn.prepareStatement(sql);
-			pstmt.setString(1, "%" + word + "%");
+			
+			pstmt.setString(1, id);
 			pstmt.setInt(2, startRnum);
 			pstmt.setInt(3, endRnum);
 			rs = pstmt.executeQuery();
 			if (rs.next()) {
-				list = new ArrayList<NoticeVO>();
 				do {
-					NoticeVO vo = new NoticeVO();
-					vo.setNotice_no(rs.getInt("notice_no"));
-					vo.setId(rs.getString("id"));
-					vo.setNotice_count(rs.getInt("notice_count"));
-					vo.setNotice_title(rs.getString("notice_title"));
-					vo.setNotice_contents(rs.getString("notice_contents"));
-					vo.setNotice_write_date(rs.getDate("Notive_write_date"));
+					FindVO vo = new FindVO();
+					vo.setDesertionNo(rs.getString("desertionNo"));
+					vo.setHappenPlace(rs.getString("happenplace"));
+					vo.setAge(rs.getString("age"));
+					vo.setCareAddr(rs.getString("care_adress"));
+					vo.setCareNm(rs.getString("care_name"));
+					vo.setCareTel(rs.getString("care_tel"));
+					vo.setColorCd(rs.getString("colorcd"));
+					vo.setFilename(rs.getString("filename"));
+					vo.setHappenDt(rs.getString("happendt"));
+					vo.setKindCd(rs.getString("DOG_KIND_NO"));
+					vo.setNeuterYn(rs.getString("neuteryn"));
+					vo.setNoticeEdt(rs.getString("noticeEdt"));
+					vo.setNoticeSdt(rs.getString("noticeSdt"));
+					vo.setOfficetel(rs.getString("officetel"));
+					vo.setOrgNm(rs.getString("orgnm"));
+					vo.setPopfile(rs.getString("popfile"));
+					vo.setProcessState(rs.getString("processstate"));
+					vo.setSexCd(rs.getString("sexcd"));
+					vo.setSpecialMark(rs.getString("specialMark"));
+					vo.setWeight(rs.getString("weight"));
 					list.add(vo);
 				} while (rs.next());
+
 			}
-		} catch (Exception e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
-		} finally {
-			close(rs, pstmt);
+		}
+		return list;
+
+	}
+	//입양 유기견 게시판 페이징을 위한 메서드
+	public int getAdoptListCount(Connection conn, PreparedStatement pstmt, ResultSet rs) {
+		SimpleDateFormat mSimpleDateFormat = new SimpleDateFormat("yyyyMMdd", Locale.KOREA);
+		Date currentTime = new Date();
+		String mTime = mSimpleDateFormat.format(currentTime);
+		System.out.println(mTime);
+		int result = 0;
+		String sql = "select count(*) from dog where noticeEdt < " + mTime;
+		try {
+			pstmt = conn.prepareStatement(sql);
+			rs = pstmt.executeQuery();
+			if (rs.next()) {
+				do {
+					result = rs.getInt(1);
+				} while (rs.next());
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return result;
+	}
+```
+#### 입양 게시판 페이징(검색)
+Find_Adopt_Search.java
+```jsx
+//입양할 유기견 검색리스트
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		request.setCharacterEncoding("UTF-8");
+		response.setContentType("text/html; charset=UTF-8");
+		String ctx = request.getContextPath();
+		if(request.getSession().getAttribute("sessionID") == null) {
+			PrintWriter out = response.getWriter();
+			out.append("<script>alert('로그인 후 이용해 주세요')</script>");
+			out.println("<script>location.href='"+ctx+"/findHowMany.do'</script>"); 
+		}else {
+			String sido = request.getParameter("sido");
+			String sigungu = request.getParameter("sigungu");
+			String address = sido+ " "+ sigungu;
+			String dogKind = request.getParameter("dogKind");
+			System.out.println("서블릿 : "+dogKind);
+			if(dogKind == null) {
+				System.out.println("견종못불러옴");
+			}else {
+				
+				System.out.println("견종" + dogKind);
+			}
+			
+			
+			FindService fService = new FindService();
+			List<FindVO> list = new ArrayList<FindVO>();
+			 
+				int pageSize = 10; // 페이지당 읽어올 글수
+				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+				int pageBlock = 10;
+			
+
+			int count = fService.getAdoptSearchBoardCount(address,dogKind);	
+			System.out.println("불러온 개수: " + count);
+			String pageNum = request.getParameter("pageNum");
+			if (pageNum == null) {
+				pageNum = "1";
+			}
+			int currentPage = Integer.parseInt(pageNum);
+
+
+			int pagecount = (count / pageSize) + (count % pageSize == 0 ? 0 : 1);
+			int startPage = 1;
+			int endPage = 1;
+			if (currentPage % 10 == 0) {
+
+				startPage = ((currentPage / 10) - 1) * pageBlock + 1;
+			} else {
+				startPage = ((currentPage / 10)) * pageBlock + 1;
+			}
+
+			endPage = startPage + pageBlock;
+			if (endPage > pagecount) {
+				endPage = pagecount;
+			}
+			 
+			
+
+			
+
+			int startRnum = (currentPage - 1) * pageSize + 1;
+			int endRnum = startRnum + pageSize - 1;
+			
+			
+			
+			request.setAttribute("sido", sido);
+			request.setAttribute("sigungu", sigungu);
+			request.setAttribute("dogKind", dogKind);
+			request.setAttribute("currentPage", currentPage); 
+			request.setAttribute("count", count);
+			request.setAttribute("endPage", endPage);
+			request.setAttribute("startPage", startPage);
+			request.setAttribute("pagecount", pagecount);
+			list = fService.getAdoptSearchDogPage(startRnum, endRnum, address, dogKind);
+			request.setAttribute("list", list);
+			System.out.println(list);
+			RequestDispatcher dis = request.getRequestDispatcher("/view/find/fine_find_Adopt_search.jsp");
+			dis.forward(request, response);
+		}
+	
+	}
+```
+FindDAO.java
+```jsx
+//입양 할 유기견 검색 메서드
+	public int getAdoptSearchBoardCount(String address, String dogKind, Connection conn, PreparedStatement pstmt,
+			ResultSet rs) {
+		SimpleDateFormat mSimpleDateFormat = new SimpleDateFormat("yyyyMMdd", Locale.KOREA);
+		Date currentTime = new Date();
+		String mTime = mSimpleDateFormat.format(currentTime);
+		System.out.println(mTime);
+		int cnt = 0;
+		String sql = "select count(*) from dog where care_adress like ?  and reservate = 0 and dog_kind_no in (select dog_kind_no from dog_kind where kind like ?) and noticeEdt <"
+				+ mTime;
+
+		try {
+
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, "%" + address + "%");
+			pstmt.setString(2, "%" + dogKind + "%");
+			rs = pstmt.executeQuery();
+			if (rs.next()) {
+				do {
+					cnt = rs.getInt(1);
+					System.out.println(cnt);
+				} while (rs.next());
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		System.out.println("검색개수!!!!" + cnt);
+		return cnt;
+	}
+```
+#### 입양 유기견 상세정보
+Find_Adopt_Detail.java
+```jsx
+//입양할 유기견 상세 정보
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		request.setCharacterEncoding("UTF-8");
+		response.setContentType("text/html; charset=UTF-8");
+		String ctx = request.getContextPath();
+		String id = (String) request.getSession().getAttribute("sessionID");
+		System.out.println(id);
+		if(request.getSession().getAttribute("sessionID") == null) {
+			PrintWriter out = response.getWriter();
+			out.append("<script>alert('로그인 후 이용해 주세요')</script>");
+			out.println("<script>location.href='"+ctx+"/findHowMany.do'</script>"); 
+		}else {
+			FindService fService = new FindService(); 
+			
+			int no = Integer.parseInt(request.getParameter("no"));
+			List<FindVO> list = new ArrayList<FindVO>();
+			list = fService.getFindDetail(no); 
+			System.out.println(list);
+			request.setAttribute("list", list);
+			//response.sendRedirect("../training/fine_training_Dtail.jsp?trn_no="+no);
+			RequestDispatcher disp = request.getRequestDispatcher("/view/find/fine_find_Adopt_Detail.jsp");
+			disp.forward(request, response);	
+		}
+		
+	}
+```
+FindDAO.java
+```jsx
+//입양할 유기견 상세 정보
+	public List<FindVO> getFindInfo(int no, Connection conn, PreparedStatement pstmt, ResultSet rs) {
+		List<FindVO> list = new ArrayList<FindVO>();
+		String sql = "select dog.*, dog_kind.kind from dog, dog_kind where dog.dog_kind_no = dog_kind.dog_kind_no and  desertionno=?";
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, no);
+			rs = pstmt.executeQuery();
+			if (rs.next()) {
+				do {
+					FindVO vo = new FindVO();
+					vo.setDesertionNo(rs.getString("desertionNo"));
+					vo.setHappenPlace(rs.getString("happenplace"));
+					vo.setAge(rs.getString("age"));
+					vo.setCareAddr(rs.getString("care_adress"));
+					vo.setCareNm(rs.getString("care_name"));
+					vo.setCareTel(rs.getString("care_tel"));
+					vo.setColorCd(rs.getString("colorcd"));
+					vo.setFilename(rs.getString("filename"));
+					vo.setHappenDt(rs.getString("happendt"));
+					vo.setKindCd(rs.getString("kind"));
+					vo.setNeuterYn(rs.getString("neuteryn"));
+					vo.setNoticeEdt(rs.getString("noticeEdt"));
+					vo.setNoticeSdt(rs.getString("noticeSdt"));
+					vo.setOfficetel(rs.getString("officetel"));
+					vo.setOrgNm(rs.getString("orgnm"));
+					vo.setPopfile(rs.getString("popfile"));
+					vo.setProcessState(rs.getString("processstate"));
+					vo.setSexCd(rs.getString("sexcd"));
+					vo.setSpecialMark(rs.getString("specialMark"));
+					vo.setWeight(rs.getString("weight"));
+					list.add(vo);
+					System.out.println(list);
+				} while (rs.next());
+			}
+		} catch (SQLException e) {
+			System.out.println("실팽");
+			e.printStackTrace();
+		}
+
+		return list;
+	}
+```
+#### 입양 페이지 이동할 때 회원 등급 체크
+Find_Reservation.java
+```jsx
+//입양예약 페이지 이동 메서드
+	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		request.setCharacterEncoding("utf-8");
+		response.setContentType("text/html;charset=utf-8");
+		List<FindVO> list = new ArrayList<FindVO>();
+		List<MemberVO> lists = new ArrayList<MemberVO>();
+		String ctx = request.getContextPath();
+		
+		if (request.getSession().getAttribute("sessionID") == null) {
+			PrintWriter out = response.getWriter();
+			out.append("<script>alert('로그인 후 이용해 주세요')</script>");
+			out.println("<script>location.href='"+ctx+"/findHowMany.do'</script>");
+		} else {
+			FindService fService = new FindService();
+			String id = (String) request.getSession().getAttribute("sessionID");
+		
+	
+			int grade = fService.gerMemberGrade(id);
+
+			if (grade >= 3) {
+				lists = fService.getMembername(id);
+			} else if (grade < 3) {
+
+				PrintWriter out = response.getWriter();
+				out.append("<script>alert('입양하기위한 등급이 낮습니다 훈련정보를 보고 퀴즈를 풀어주세요!')</script>");
+				out.println("<script>history.back()</script>");
+				out.flush();
+				out.close();
+			}
+			int no = Integer.parseInt(request.getParameter("dogNum"));
+			list = fService.getFindDetail(no);
+			System.out.println(list);
+			if (list == null) {
+				System.out.println("예약서블릿의 리스트가 비어있습니다");
+			} else
+			request.setAttribute("lists", lists);
+			request.setAttribute("list", list);
+			RequestDispatcher disp = request.getRequestDispatcher("/view/find/find_reservation.jsp");
+			disp.forward(request, response);
+
+		}
+
+	}
+```
+FindDAO.java
+```jsx
+//회원의 등급을 가져오는 메서드
+	public int gerMemberGrade(String id, Connection conn, PreparedStatement pstmt, ResultSet rs) {
+		String sql = "select grade from member where id = ?";
+		int result = 0;
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, id);
+			rs = pstmt.executeQuery();
+			if (rs.next()) {
+				result = Integer.parseInt(rs.getString("grade"));
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return result;
+	}
+	//입양하기 위한 회원의 정보를 가져오는 메서드
+	public List<MemberVO> getMemberName(Connection conn, DataSource ds, ResultSet rs, PreparedStatement pstmt,
+			String id) {
+		// TODO Auto-generated method stub
+		List<MemberVO> name = new ArrayList<MemberVO>();
+		String sql = "select id, name, address, phone, birthday from member where id = ?";
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, id);
+			rs = pstmt.executeQuery();
+			if (rs.next()) {
+				do {
+					MemberVO vo = new MemberVO();
+					vo.setId(rs.getString("id"));
+					vo.setAddress(rs.getString("address"));
+					vo.setPhone(rs.getString("phone"));
+					vo.setName(rs.getString("name"));
+					name.add(vo);
+				} while (rs.next());
+			}
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return name;
+	}
+	//입양할 유기견 상세 정보
+	public List<FindVO> getFindInfo(int no, Connection conn, PreparedStatement pstmt, ResultSet rs) {
+		List<FindVO> list = new ArrayList<FindVO>();
+		String sql = "select dog.*, dog_kind.kind from dog, dog_kind where dog.dog_kind_no = dog_kind.dog_kind_no and  desertionno=?";
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, no);
+			rs = pstmt.executeQuery();
+			if (rs.next()) {
+				do {
+					FindVO vo = new FindVO();
+					vo.setDesertionNo(rs.getString("desertionNo"));
+					vo.setHappenPlace(rs.getString("happenplace"));
+					vo.setAge(rs.getString("age"));
+					vo.setCareAddr(rs.getString("care_adress"));
+					vo.setCareNm(rs.getString("care_name"));
+					vo.setCareTel(rs.getString("care_tel"));
+					vo.setColorCd(rs.getString("colorcd"));
+					vo.setFilename(rs.getString("filename"));
+					vo.setHappenDt(rs.getString("happendt"));
+					vo.setKindCd(rs.getString("kind"));
+					vo.setNeuterYn(rs.getString("neuteryn"));
+					vo.setNoticeEdt(rs.getString("noticeEdt"));
+					vo.setNoticeSdt(rs.getString("noticeSdt"));
+					vo.setOfficetel(rs.getString("officetel"));
+					vo.setOrgNm(rs.getString("orgnm"));
+					vo.setPopfile(rs.getString("popfile"));
+					vo.setProcessState(rs.getString("processstate"));
+					vo.setSexCd(rs.getString("sexcd"));
+					vo.setSpecialMark(rs.getString("specialMark"));
+					vo.setWeight(rs.getString("weight"));
+					list.add(vo);
+					System.out.println(list);
+				} while (rs.next());
+			}
+		} catch (SQLException e) {
+			System.out.println("실팽");
+			e.printStackTrace();
+		}
+
+		return list;
+	}
+```
+#### 입양 정보 
+Find_Reservation_Adopt.java
+```jsx
+    //입양예약 메서드
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		request.setCharacterEncoding("UTF-8");
+		response.setContentType("text/html; charset=UTF-8");
+		String ctx = request.getContextPath();
+		String id = (String) request.getSession().getAttribute("sessionID");
+		if(request.getSession().getAttribute("sessionID") == null) {
+				PrintWriter out = response.getWriter();
+				out.append("<script>alert('로그인 후 이용해 주세요')</script>");
+				out.println("<script>location.href='"+ctx+"/findHowMany.do'</script>"); 
+				out.flush();
+				out.close();
+			
+		}else {
+				FindService fService = new FindService();
+				int grade = fService.gerMemberGrade(id);
+				if (grade >= 3) {
+					int dogNum = Integer.parseInt(request.getParameter("dogNum"));
+					String careNm = request.getParameter("careName"); //보호소 번호 가져와야함
+					String careNoResult = fService.getCareNo(careNm); 
+					String adoptDate = request.getParameter("date");
+					SimpleDateFormat format1 = new SimpleDateFormat ("yyyyMMdd");
+					Calendar time = Calendar.getInstance();					       
+					String today = format1.format(time.getTime());
+					
+				
+					if(adoptDate.equals("")) {
+						PrintWriter out = response.getWriter();
+						out.append("<script>alert('날짜를 선택해 주세요')</script>");
+						out.println("<script>history.back()</script>");
+						out.flush();
+						out.close();
+					}else {
+						if(Integer.parseInt(adoptDate) < Integer.parseInt(today)) {
+							PrintWriter out = response.getWriter();
+							out.append("<script>alert('오늘날짜 이후를 선택해주세요')</script>");
+							out.println("<script>history.back()</script>");
+							out.flush();
+							out.close();
+						}
+					}
+					String[] chk = request.getParameterValues("agree");
+					if(chk == null) {
+						PrintWriter out = response.getWriter();
+						out.append("<script>alert('약관에 동의해 주세요')</script>");
+						out.println("<script>history.back()</script>");
+						out.flush();
+						out.close();
+					}else {
+						if(chk.length != 2) {
+							PrintWriter out = response.getWriter();
+							out.append("<script>alert('약관에 동의해 주세요')</script>");
+							out.println("<script>history.back()</script>");
+						}else if(chk.length == 2){
+							int result = fService.insertReservatoin(careNoResult,adoptDate,dogNum,id);
+							if(result == 1) {
+								int update = fService.updateDog(dogNum);
+								if(update == 1) {
+									response.sendRedirect("./view/find/find_reservation_done.jsp");									
+								}else {
+									PrintWriter out = response.getWriter();
+									out.append("<script>alert('이미 누가 예약을 끝냈습니다. 다른 유기견도 기다리고 있습니다!')</script>");
+									out.println("<script>'"+ctx+"/findHowMany.do'</script>");
+									out.flush();
+									out.close();
+								}
+								
+							}else {
+								PrintWriter out = response.getWriter();
+								out.append("<script>alert('죄송합니다 입양예약에 실패하였습니다! 다시 시도해 주세요')</script>");
+								out.println("<script>'"+ctx+"/findHowMany.do'</script>");
+								out.flush();
+								out.close();
+							}
+							
+						}	
+					}
+					
+					//db저장
+				}else {
+					PrintWriter out = response.getWriter();
+					out.append("<script>alert('부적절한 등급입니다.')</script>");
+					out.println("<script>location.href='./view/main/index.jsp'</script>");
+					out.flush();
+					out.close();
+				}
+		}
+	
+	}
+```
+FindDAO.java
+```jsx
+//입양예약 메서드
+	public int insertReservatoin(String careNoResult, String adoptDate, int dogNum, String id, Connection conn,
+			PreparedStatement pstmt, DataSource ds) {
+		int result = 0;
+		String sql = "insert into reservation(RESERCATION_NO,DESERTIONNO,ID,CARE_NO,RESERVATION_DATE) "
+				+ "values(RESERVATION_SEQ.NEXTVAL,?,?,?,?)";
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, dogNum);
+			pstmt.setString(2, id);
+			pstmt.setString(3, careNoResult);
+			pstmt.setString(4, adoptDate);
+			result = pstmt.executeUpdate();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return result;
+	}
+```
+#### 입양 관련 서류 다운로드
+Find_document_down.java
+```jsx
+    //입양 관련서류 파일 다운로드
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// TODO Auto-generated method stub
+		//게시글 첨부파일 다운 처리용 컨트롤러
+		
+		request.setCharacterEncoding("utf-8");
+		//프로젝트 내에 파일이 저장된 폴더의 경로정보 얻어옴
+		String readFolder = request.getSession().getServletContext().getRealPath("/upload/adoptfile");
+		String oolean = request.getParameter("file");
+		System.out.println(oolean);
+		ServletOutputStream downOut =
+				response.getOutputStream();
+				File downFile = new File(readFolder + "/" + oolean);
+				response.setContentType("text/plain; charset=utf-8");
+				String originalFileName = "findDoc.hwp";
+				
+				
+				//한글 파일명 인코딩 처리함
+				response.addHeader("Content-Disposition",
+				"attachment; filename=\"" +
+				new String(originalFileName .getBytes("UTF-8"),"ISO-8859-1") + "\"");
+				response.setContentLength((int)downFile.length());
+				BufferedInputStream bin = new BufferedInputStream(
+				new FileInputStream(downFile));
+				int read = -1;
+				while((read = bin.read()) != -1){
+				downOut.write(read);
+				downOut.flush();
+				}
+				downOut.close();
+				bin.close();
+	}
+```
+### 잃어버린 유기견 리스트 
+Find_Lists.java
+```jsx
+ //잃어버린 유기견 리스트
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		request.setCharacterEncoding("UTF-8");
+		response.setContentType("text/html; charset=UTF-8");
+		
+		FindService fService = new FindService();
+		List<FindVO> list = new ArrayList<FindVO>();
+		 
+			int pageSize = 10; // 페이지당 읽어올 글수
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+			int pageBlock = 10;
+		
+
+		int count = fService.getBoardCount(); 	
+		System.out.println(count);
+		String pageNum = request.getParameter("pageNum");
+		if (pageNum == null) {
+			pageNum = "1";
+		}
+		int currentPage = Integer.parseInt(pageNum);
+
+
+		int pagecount = (count / pageSize) + (count % pageSize == 0 ? 0 : 1);
+		int startPage = 1;
+		int endPage = 1;
+		if (currentPage % 10 == 0) {
+
+			startPage = ((currentPage / 10) - 1) * pageBlock + 1;
+		} else {
+			startPage = ((currentPage / 10)) * pageBlock + 1;
+		}
+
+		endPage = startPage + pageBlock;
+		if (endPage > pagecount) {
+			endPage = pagecount;
+		}
+		 
+		
+
+		
+
+		int startRnum = (currentPage - 1) * pageSize + 1;
+		int endRnum = startRnum + pageSize - 1;
+		
+		
+		
+		request.setAttribute("currentPage", currentPage); 
+		request.setAttribute("count", count);
+		request.setAttribute("endPage", endPage);
+		request.setAttribute("startPage", startPage);
+		
+		request.setAttribute("pagecount", pagecount);
+		
+		list = fService.getFindInfo(startRnum, endRnum);
+		System.out.println("안녕히세여 :" + list);
+		request.setAttribute("list", list);
+		
+		RequestDispatcher dis = request.getRequestDispatcher("./view/find/fine_find_List.jsp");
+		dis.forward(request, response);
+	
+	}
+
+```
+FindDAO.java
+```jsx
+//페이징을 위한 데이터 개수 세는 메서드
+	public int getBoardCount(Connection conn, PreparedStatement pstmt, ResultSet rs) {
+		int result = 0;
+		String sql = "select count(*) from dog";
+		try {
+			pstmt = conn.prepareStatement(sql);
+			rs = pstmt.executeQuery();
+			if (rs.next()) {
+				do {
+					result = rs.getInt(1);
+				} while (rs.next());
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return result;
+	}
+	//유기견 찾기 정보 불러오기 메서드
+	public List<FindVO> getFindInfo(int startRnum, int endRnum, Connection conn, PreparedStatement pstmt,
+			ResultSet rs) {
+		List<FindVO> list = new ArrayList<FindVO>();
+		String sql = "select * from(select rownum rnum, d.* from (select * from dog order by desertionNo desc) d) where rnum >= ? and rnum <= ?";
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, startRnum);
+			pstmt.setInt(2, endRnum);
+			rs = pstmt.executeQuery();
+			if (rs.next()) {
+				do {
+					FindVO vo = new FindVO();
+					vo.setDesertionNo(rs.getString("desertionNo"));
+					vo.setHappenPlace(rs.getString("happenplace"));
+					vo.setAge(rs.getString("age"));
+					vo.setCareAddr(rs.getString("care_adress"));
+					vo.setCareNm(rs.getString("care_name"));
+					vo.setCareTel(rs.getString("care_tel"));
+					vo.setColorCd(rs.getString("colorcd"));
+					vo.setFilename(rs.getString("filename"));
+					vo.setHappenDt(rs.getString("happendt"));
+					vo.setKindCd(rs.getString("DOG_KIND_NO"));
+					vo.setNeuterYn(rs.getString("neuteryn"));
+					vo.setNoticeEdt(rs.getString("noticeEdt"));
+					vo.setNoticeSdt(rs.getString("noticeSdt"));
+					vo.setOfficetel(rs.getString("officetel"));
+					vo.setOrgNm(rs.getString("orgnm"));
+					vo.setPopfile(rs.getString("popfile"));
+					vo.setProcessState(rs.getString("processstate"));
+					vo.setSexCd(rs.getString("sexcd"));
+					vo.setSpecialMark(rs.getString("specialMark"));
+					vo.setWeight(rs.getString("weight"));
+					list.add(vo);
+
+				} while (rs.next());
+				return list;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return list;
+
+	}
+```
+### 잃어버린 유기견 리스트(검색) 
+Find_Search.java
+```jsx
+    //잃어버린 유기견 검색 메서드
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		request.setCharacterEncoding("UTF-8");
+		response.setContentType("text/html; charset=UTF-8");
+		
+		String sido = request.getParameter("sido");
+		String sigungu = request.getParameter("sigungu");
+		String address = sido+ " "+ sigungu;
+		String dogKind = request.getParameter("dogKind");
+		String happenDt = request.getParameter("happenDt");
+		System.out.println("서블릿 : " + happenDt);
+		System.out.println("서블릿 : "+ address);
+		System.out.println("서블릿 : "+dogKind);
+		if(dogKind == null) {
+			System.out.println("견종못불러옴");
+		}else {
+			
+			System.out.println("견종" + dogKind);
+		}
+		
+		
+		FindService fService = new FindService();
+		List<FindVO> list = new ArrayList<FindVO>();
+		 
+			int pageSize = 10; // 페이지당 읽어올 글수
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+			int pageBlock = 10;
+		
+
+		int count = fService.getSearchBoardCount(address,dogKind, happenDt);	
+		System.out.println("불러온 개수: " + count);
+		String pageNum = request.getParameter("pageNum");
+		if (pageNum == null) {
+			pageNum = "1";
+		}
+		int currentPage = Integer.parseInt(pageNum);
+
+
+		int pagecount = (count / pageSize) + (count % pageSize == 0 ? 0 : 1);
+		int startPage = 1;
+		int endPage = 1;
+		if (currentPage % 10 == 0) {
+
+			startPage = ((currentPage / 10) - 1) * pageBlock + 1;
+		} else {
+			startPage = ((currentPage / 10)) * pageBlock + 1;
+		}
+
+		endPage = startPage + pageBlock;
+		if (endPage > pagecount) {
+			endPage = pagecount;
+		}
+		 
+		
+
+		
+
+		int startRnum = (currentPage - 1) * pageSize + 1;
+		int endRnum = startRnum + pageSize - 1;
+		
+		
+		
+		request.setAttribute("sido", sido);
+		request.setAttribute("sigungu", sigungu);
+		request.setAttribute("dogKind", dogKind);
+		request.setAttribute("happenDt", happenDt);
+		request.setAttribute("currentPage", currentPage); 
+		request.setAttribute("count", count);
+		request.setAttribute("endPage", endPage);
+		request.setAttribute("startPage", startPage);
+		request.setAttribute("pagecount", pagecount);
+		list = fService.getSearchDogPage(startRnum, endRnum, address, dogKind, happenDt);
+		request.setAttribute("list", list);
+		System.out.println(list);
+		RequestDispatcher dis = request.getRequestDispatcher("/view/find/fine_find_search.jsp");
+		dis.forward(request, response);
+	}
+```
+FindDAO.java
+```jsx
+//유기견 찾기 검색 리스트 갯수 세는 메서드
+public int getSearchBoardCount(String address, String dogKind, String happenDt, Connection conn,
+			PreparedStatement pstmt, ResultSet rs) {
+		int cnt = 0;
+		String sql = "select count(*) from dog where care_adress like ?  and dog_kind_no in (select dog_kind_no from dog_kind where kind like ?) and happenDt > ?";
+
+		try {
+
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, "%" + address + "%");
+			pstmt.setString(2, "%" + dogKind + "%");
+			pstmt.setString(3, happenDt);
+			rs = pstmt.executeQuery();
+			if (rs.next()) {
+				do {
+					cnt = rs.getInt(1);
+					System.out.println(cnt);
+				} while (rs.next());
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		System.out.println("검색개수!!!!" + cnt);
+		return cnt;
+
+	}
+	//검색한 유기견 찾기 정보 메서드
+	public List<FindVO> getSearchDogPage(String address, String dogKind, String happenDt, int startRnum, int endRnum,
+			Connection conn, PreparedStatement pstmt, ResultSet rs) {
+		List<FindVO> list = new ArrayList<FindVO>();
+
+		String sql = "select * from(select rownum rnum, d.* from "
+				+ "(select * from dog where dog_kind_no = (select dog_kind_no from dog_kind where kind like ?) and care_adress like ? and happenDt > ?) d) "
+				+ "where rnum >= ? and rnum <= ?";
+		try {
+
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, "%" + dogKind + "%");
+			pstmt.setString(2, "%" + address + "%");
+			pstmt.setString(3, happenDt);
+			pstmt.setInt(4, startRnum);
+			pstmt.setInt(5, endRnum);
+			rs = pstmt.executeQuery();
+			System.out.println("ㅎㅇㅎㅇ");
+			if (rs.next()) {
+				do {
+					FindVO vo = new FindVO();
+					vo.setDesertionNo(rs.getString("desertionNo"));
+					vo.setHappenPlace(rs.getString("happenplace"));
+					vo.setAge(rs.getString("age"));
+					vo.setCareAddr(rs.getString("care_adress"));
+					vo.setCareNm(rs.getString("care_name"));
+					vo.setCareTel(rs.getString("care_tel"));
+					vo.setColorCd(rs.getString("colorcd"));
+					vo.setFilename(rs.getString("filename"));
+					vo.setHappenDt(rs.getString("happendt"));
+					vo.setKindCd(rs.getString("DOG_KIND_NO"));
+					vo.setNeuterYn(rs.getString("neuteryn"));
+					vo.setNoticeEdt(rs.getString("noticeEdt"));
+					vo.setNoticeSdt(rs.getString("noticeSdt"));
+					vo.setOfficetel(rs.getString("officetel"));
+					vo.setOrgNm(rs.getString("orgnm"));
+					vo.setPopfile(rs.getString("popfile"));
+					vo.setProcessState(rs.getString("processstate"));
+					vo.setSexCd(rs.getString("sexcd"));
+					vo.setSpecialMark(rs.getString("specialMark"));
+					vo.setWeight(rs.getString("weight"));
+					list.add(vo);
+				} while (rs.next());
+
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return list;
+
+	}
+```
+### 잃어버린 유기견 상세 정보 
+Find_Detail.java
+```jsx
+ //유기견 찾기 상세정보
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		request.setCharacterEncoding("UTF-8");
+		response.setContentType("text/html; charset=UTF-8");
+		int no = Integer.parseInt(request.getParameter("no"));
+		FindService fService = new FindService(); 
+		List<FindVO> list = new ArrayList<FindVO>();
+		list = fService.getFindDetail(no); 
+		System.out.println(list);
+		request.setAttribute("list", list);
+		//response.sendRedirect("../training/fine_training_Dtail.jsp?trn_no="+no);
+		RequestDispatcher disp = request.getRequestDispatcher("/view/find/fine_find_Detail.jsp");
+		disp.forward(request, response);
+	}
+```
+FindDAO.java
+```jsx
+//입양할 유기견 상세 정보
+	public List<FindVO> getFindInfo(int no, Connection conn, PreparedStatement pstmt, ResultSet rs) {
+		List<FindVO> list = new ArrayList<FindVO>();
+		String sql = "select dog.*, dog_kind.kind from dog, dog_kind where dog.dog_kind_no = dog_kind.dog_kind_no and  desertionno=?";
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, no);
+			rs = pstmt.executeQuery();
+			if (rs.next()) {
+				do {
+					FindVO vo = new FindVO();
+					vo.setDesertionNo(rs.getString("desertionNo"));
+					vo.setHappenPlace(rs.getString("happenplace"));
+					vo.setAge(rs.getString("age"));
+					vo.setCareAddr(rs.getString("care_adress"));
+					vo.setCareNm(rs.getString("care_name"));
+					vo.setCareTel(rs.getString("care_tel"));
+					vo.setColorCd(rs.getString("colorcd"));
+					vo.setFilename(rs.getString("filename"));
+					vo.setHappenDt(rs.getString("happendt"));
+					vo.setKindCd(rs.getString("kind"));
+					vo.setNeuterYn(rs.getString("neuteryn"));
+					vo.setNoticeEdt(rs.getString("noticeEdt"));
+					vo.setNoticeSdt(rs.getString("noticeSdt"));
+					vo.setOfficetel(rs.getString("officetel"));
+					vo.setOrgNm(rs.getString("orgnm"));
+					vo.setPopfile(rs.getString("popfile"));
+					vo.setProcessState(rs.getString("processstate"));
+					vo.setSexCd(rs.getString("sexcd"));
+					vo.setSpecialMark(rs.getString("specialMark"));
+					vo.setWeight(rs.getString("weight"));
+					list.add(vo);
+					System.out.println(list);
+				} while (rs.next());
+			}
+		} catch (SQLException e) {
+			System.out.println("실팽");
+			e.printStackTrace();
+		}
+
+		return list;
+	}
+```
+### 제휴 보호소 관리자 별 보호중인 유기견 목록 
+Fine_find_manage_List.java
+```jsx
+    //매니저 자신의 보호소에 등록된 유기견 정보 가져오기 
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		request.setCharacterEncoding("UTF-8");
+		response.setContentType("text/html; charset=UTF-8");
+	
+		
+				String checkLev = (String) request.getSession().getAttribute("memberLev");
+				String checkId = (String) request.getSession().getAttribute("sessionID");
+				
+					FindService fService = new FindService();
+					List<FindVO> list = new ArrayList<FindVO>();
+					 
+						int pageSize = 10; // 페이지당 읽어올 글수
+						SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+						int pageBlock = 10;
+					
+
+					int count = fService.getManageAdoptBoardCount(checkId, checkLev); 	
+					System.out.println(count);
+					String pageNum = request.getParameter("pageNum");
+					if (pageNum == null) {
+						pageNum = "1";
+					}
+					int currentPage = Integer.parseInt(pageNum);
+
+
+					int pagecount = (count / pageSize) + (count % pageSize == 0 ? 0 : 1);
+					int startPage = 1;
+					int endPage = 1;
+					if (currentPage % 10 == 0) {
+
+						startPage = ((currentPage / 10) - 1) * pageBlock + 1;
+					} else {
+						startPage = ((currentPage / 10)) * pageBlock + 1;
+					}
+
+					endPage = startPage + pageBlock;
+					if (endPage > pagecount) {
+						endPage = pagecount;
+					}
+					 
+					
+
+					
+
+					int startRnum = (currentPage - 1) * pageSize + 1;
+					int endRnum = startRnum + pageSize - 1;
+					
+					
+					
+					request.setAttribute("currentPage", currentPage); 
+					request.setAttribute("count", count);
+					request.setAttribute("endPage", endPage);
+					request.setAttribute("startPage", startPage);
+					
+					request.setAttribute("pagecount", pagecount);
+					
+					list = fService.getFindManageList(checkId, checkLev, startRnum, endRnum);
+					System.out.println("안녕히세여 :" + list);
+					request.setAttribute("list", list);
+					
+					RequestDispatcher dis = request.getRequestDispatcher("./view/find/fine_find_Adopt_manage_List.jsp");
+					dis.forward(request, response);
+				}
+```
+FindDAO.java
+```jsx
+//보호소 별 보호중인 유기견 목록가져오는 메서드
+	public List<FindVO> getFindManageList(String checkId, String lev, int startRnum, int endRnum, Connection conn,
+			PreparedStatement pstmt, ResultSet rs) {
+		List<FindVO> list = new ArrayList<FindVO>();
+		String sql = "select * from(select rownum rnum, d.* from (select * from dog where care_name = (select care_name from care where care_no =(select care_no from member where id = ? and lev = ?))order by desertionNo desc) d) where rnum >= ? and rnum <= ?";
+		try {
+
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, checkId);
+			pstmt.setString(2, lev);
+			pstmt.setInt(3, startRnum);
+			pstmt.setInt(4, endRnum);
+			rs = pstmt.executeQuery();
+			if (rs.next()) {
+				do {
+					FindVO vo = new FindVO();
+					vo.setDesertionNo(rs.getString("desertionNo"));
+					vo.setHappenPlace(rs.getString("happenplace"));
+					vo.setAge(rs.getString("age"));
+					vo.setCareAddr(rs.getString("care_adress"));
+					vo.setCareNm(rs.getString("care_name"));
+					vo.setCareTel(rs.getString("care_tel"));
+					vo.setColorCd(rs.getString("colorcd"));
+					vo.setFilename(rs.getString("filename"));
+					vo.setHappenDt(rs.getString("happendt"));
+					vo.setKindCd(rs.getString("DOG_KIND_NO"));
+					vo.setNeuterYn(rs.getString("neuteryn"));
+					vo.setNoticeEdt(rs.getString("noticeEdt"));
+					vo.setNoticeSdt(rs.getString("noticeSdt"));
+					vo.setOfficetel(rs.getString("officetel"));
+					vo.setOrgNm(rs.getString("orgnm"));
+					vo.setPopfile(rs.getString("popfile"));
+					vo.setProcessState(rs.getString("processstate"));
+					vo.setSexCd(rs.getString("sexcd"));
+					vo.setSpecialMark(rs.getString("specialMark"));
+					vo.setWeight(rs.getString("weight"));
+					list.add(vo);
+				} while (rs.next());
+
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
 		return list;
 	}
 ```
-word 라는 String 변수의 값을 제목에서 찾아내어, 해당 게시글의 글번호와, 작성자, 조회수, 제목, 내용, 날짜를 셋해주는 소스코드입니다. 
-List<NoticeVO>형의 메소드로 검색시 글 리스트가 보여지며 글 검색했을 시에도 페이징이 잘 되도록 startRnum과 endRnum변수를 주었습니다. 
-  
-#### 글 작성 (파일업로드)
-공지사항 (notice)페이지의 글 작성은 관리자만 가능하므로 아래와 같이 관리자로그인을 한 경우(memberLev == 3)에만 글작성을 할 수 있도록 구현했습니다. 
-noticeList.jsp
+### 보호소에 들어온 유기견 입력 
+Find_fine_manage_write.java
 ```jsx
-		<tr>
-			<th colspan="5">
-		 <c:if test="${memberLev eq 3 }">	
-			<a href="noticeFixCount.do">글작성</a>
-			 </c:if>
-			</th>
-		</tr>
-```
-
-noticeWrite.java
-```jsx
-private void execute(HttpServletRequest request, HttpServletResponse response)
+	//관리자가 직접 유기견의 정보 db인서트
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		String id = (String) request.getSession().getAttribute("sessionID");
-		System.out.println(id);
-		NoticeService nService = new NoticeService();
-		String folderPath = getServletContext().getRealPath("/files");
-		MultipartRequest mReq = new MultipartRequest(request, folderPath, 5 * 1024 * 1024, "utf-8",
-				new DefaultFileRenamePolicy());
-		List<String> saveFiles = new ArrayList<String>();
-		List<String> originFiles = new ArrayList<String>();
-		Enumeration<String> files = mReq.getFileNames();
-		while (files.hasMoreElements()) {
-			String name = files.nextElement();
-			String filename = mReq.getFilesystemName(name);
-			String originfilename = mReq.getOriginalFileName(name);
-			saveFiles.add(filename);
-			originFiles.add(originfilename);
-		}	
-		String title = mReq.getParameter("notice_title");
-		String contents = mReq.getParameter("notice_contents");
-		int pin = 0;
-		if (mReq.getParameter("pin") != null){
-		 pin = Integer.parseInt(mReq.getParameter("pin"));
-		}
-		NoticeVO vo = new NoticeVO();
-		if (title != null && contents != null) {
-			vo.setNotice_title(title);
-			vo.setNotice_contents(contents);
-			vo.setNotice_img(saveFiles);
-			vo.setPin(pin);
-			vo.setId(id);
-			int result = nService.writeNotice(id, title, contents, saveFiles, pin);
-			if (result < 0) {
-				response.sendRedirect("<script>alert('오류가 발생했습니다.');</script>");
-				return;
+		request.setCharacterEncoding("UTF-8");
+		response.setContentType("text/html; charset=UTF-8");
+	
+		
+		
+		
+		String checkId = (String) request.getSession().getAttribute("sessionID");;
+		
+			if (!ServletFileUpload.isMultipartContent(request))
+				response.sendRedirect("findHowMany.do");
+
+			ServletContext context = getServletContext();
+			String uploadPath = context.getRealPath(fileSavePath);
+			System.out.println(uploadPath);
+			MultipartRequest multi = new MultipartRequest(request, // request 객체
+					uploadPath, // 서버 상 업로드 될 디렉토리
+					uploadSizeLimit, // 업로드 파일 크기 제한
+					encType, // 인코딩 방법
+					new DefaultFileRenamePolicy() // 동일 이름 존재 시 새로운 이름 부여 방식
+			);
+
+
+			// 업로드 된 파일 이름 얻어오기
+			String file = multi.getFilesystemName("uploadFile");
+			System.out.println(file);
+
+			String happenPlace = multi.getParameter("happenPlace");
+			String age = multi.getParameter("age");
+			String colorCd = multi.getParameter("colorCd");
+			String happenDt = multi.getParameter("happenDt");
+			String dogKind = multi.getParameter("dogKind");
+			String neuterYn = multi.getParameter("neuterYn");
+			String officetel = multi.getParameter("officetel");
+			String orgNm = multi.getParameter("orgNm");
+			String sexCd = multi.getParameter("sexCd");
+			String specialMark = multi.getParameter("happenPlace");
+			String weight = multi.getParameter("happenPlace");
+			if (happenPlace != null && !happenPlace.equals("") && age != null && !age.equals("") && colorCd != null
+					&& !colorCd.equals("") && happenDt != null && !happenDt.equals("") && dogKind != null
+					&& !dogKind.equals("") && neuterYn != null && !neuterYn.equals("") 
+					&&  officetel != null && !officetel.equals("") && orgNm != null
+					&& !orgNm.equals("") && sexCd != null && !sexCd.equals("") && specialMark != null
+					&& !specialMark.equals("") && weight != null && !weight.equals("")) {
+				System.out.println("들어오냐?");
+				FindService fService = new FindService();
+				FindVO vo = new FindVO();
+				vo.setHappenPlace(happenPlace);
+				vo.setAge(age);
+				vo.setColorCd(colorCd);
+				vo.setHappenDt(happenDt);
+				vo.setKindCd(dogKind);
+				vo.setNeuterYn(neuterYn);
+				vo.setOfficetel(officetel);
+				vo.setOrgNm(orgNm);
+				vo.setSexCd(sexCd);
+				vo.setSpecialMark(specialMark);
+				vo.setWeight(weight);
+				System.out.println("vo저장");
+				int result = fService.FindMangerWrite(checkId,vo, file);
+				System.out.println(result);
+				if (result == 1) {
+					PrintWriter out = response.getWriter();
+					out.println("<script>alert('등록이 완료 되었습니다.')</script>");
+
+					response.sendRedirect("fine_find_manage_List.do");
+				} else {
+					RequestDispatcher disp = request.getRequestDispatcher("/view/find/fine_find_manage_List.jsp");
+					disp.forward(request, response);
+				}
 			}
 		}
-		response.sendRedirect("noticeList.do");
-	}
+	
+
+
+}
 ```
-NoticeDAO.java
+FindDAO.java
 ```jsx
-  public int writeNotice(Connection conn, String id, String title, String contents, List<String> img, int pin) {
-		int result1 = 0;
-		int result2 = 0;
-		String query = "INSERT INTO notice (notice_no, id, notice_title, notice_contents,notice_count, pin)
-		VALUES(notice_no_seq.nextval, ?, ?, ?, 0, ?)";
-		try {
-			pstmt = conn.prepareStatement(query);
-			pstmt.setString(1, id);
-			pstmt.setString(2, title);
-			pstmt.setString(3, contents);
-			pstmt.setInt(4, pin);
-			result1 = pstmt.executeUpdate();
-		} catch (SQLException e) { e.printStackTrace();
-		} finally {
-			close(rs, pstmt);
-		} 
-		if (img == null) {
-			result2 =1;
-		}else {
-		for (int i = 0; i < img.size(); i++) {
-			query = "INSERT INTO tbl_img (img_no, notice_no, img) VALUES(img_seq.nextval, notice_no_seq.currval, ? )";
-			try {
-				pstmt = conn.prepareStatement(query);
-				pstmt.setString(1, (String)img.get(i));
-				result2 = pstmt.executeUpdate();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			} finally {
-				close(rs, pstmt);
-			}
-		}
-		}
-		if (result1 != 0 || result2 != 0 ) 
-			return 1;
-			else return 0;
-	}
-```
-```jsx
-public int DeleteNotice(Connection conn, int no) {
-		String sql = "DELETE FROM notice WHERE notice_no = ?";
+//유기견 정보 입력
+	public int FindMangerWrite(String checkId, FindVO vo, String file, Connection conn, PreparedStatement pstmt) {
+		SimpleDateFormat mSimpleDateFormat = new SimpleDateFormat("yyyyMMdd", Locale.KOREA);
+		Date currentTime = new Date();
+		String mTime = mSimpleDateFormat.format(currentTime);
+		System.out.println(mTime);
+
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(new Date());
+		cal.add(Calendar.DATE, +10);
+		System.out.println("10일 뒤 날짜 : " + mSimpleDateFormat.format(cal.getTime()));
 		int result = 0;
+		String sql = "insert into dog(desertionno, care_name, care_adress, care_tel, happenPlace, age, colorcd, filename, happendt, dog_kind_no, neuteryn, noticeEdt, noticeSdt, officeTel, orgNm, popFile, processstate, sexcd, specialmark, weight)"
+				+ "values(SEQ_dog_NO.NEXTVAL,(select care_name from care where care_no = (select care_no from member where id = ?)),(select adress from care where care_no = (select care_no from member where id = ?)),(select tel from care where care_no = (select care_no from member where id = ?))"
+				+ ",?,?,?,'./upload/dog/" + file + "',?,(select dog_kind_no from dog_kind where kind = ?), ?, "
+				+ mSimpleDateFormat.format(cal.getTime()) + "," + mTime
+				+ ", (select phone from member where id=?),?,?,'보호중',?,?,?)";
 		try {
 			pstmt = conn.prepareStatement(sql);
-			pstmt.setInt(1, no);
+			pstmt.setString(1, checkId);
+			pstmt.setString(2, checkId);
+			pstmt.setString(3, checkId);
+			pstmt.setString(4, vo.getHappenPlace());
+			pstmt.setString(5, vo.getAge());
+			pstmt.setString(6, vo.getColorCd());
+			pstmt.setString(7, vo.getHappenDt());
+			pstmt.setString(8, vo.getKindCd());
+			pstmt.setString(9, vo.getNeuterYn());
+			pstmt.setString(10, checkId);
+			pstmt.setString(11, vo.getOrgNm());
+			pstmt.setString(12, "./upload/dog/"+file);
+			pstmt.setString(13, vo.getSexCd());
+			pstmt.setString(14, vo.getSpecialMark());
+			pstmt.setString(15, vo.getWeight());
 			result = pstmt.executeUpdate();
-		} catch (Exception e) {
+			if (result == 1) {
+				return result;
+			} else {
+				System.out.println("유기견입력실패");
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} finally {
-			close(rs, pstmt);
 		}
+
 		return result;
 	}
 ```
-글 작성시 이미지를 등록할 수 있습니다. 이미지를 등록하지 않았다면 notice테이블에 글만 인서트되며 이미지가 null이 아닐시에는 tbl_img에 해당 이미지를 인서트합니다. 
-하나의 글 번호에 이미지가 여러장 입력될 시, 이미지의 사이즈만큼 쿼리문을 수행하며 이미지를 셋해줍니다.
-이미지가 등록에 실패했다면 글 등록도 실패합니다. 
+### 보호소에 들어온 유기견 입력
+Find_manage_delete.java
+```jsx
+    //유기견 삭제 메서드
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		FindVO vo = new FindVO();
+		FindService fService = new FindService();
+		ServletContext context = getServletContext();
+		String no = request.getParameter("no");
+		vo.setDesertionNo(no);
+		
+		String path = context.getRealPath("upload\\dog"); 
+		fService.FindDeleteFileName(vo);
+		String filepath = vo.getFilename();
+		filepath.substring(11);
+		System.out.println("filepath : "+filepath);
+		
+		System.out.println(path);
+		File f = new File(path +"\\"+filepath);
+		if(f.exists()){
+			f.delete();
+			System.out.println("파일 삭제됨");
+		}else{
+			System.out.println("파일 없음");
+		}
+		
+		
+		int result = fService.FindDelete(vo);
+		System.out.println(result);
+		
+		if(result==1) {
+			PrintWriter out = response.getWriter();
+			out.println("<script>alert('삭제가 완료 되었습니다.')</script>");
+			response.sendRedirect("fine_find_manage_List.do");
+		}else {
+			PrintWriter out = response.getWriter();
+			out.println("<script>alert('삭제를 실패 하였습니다.')</script>");
+			response.sendRedirect("fine_find_manage_List.do");
+		}
+	
+	
+	}
+```
+FindDAO.java
+```jsx
+//유기견 주인이 찾은 유기견 삭제 메서드
+	public int findDelete(Connection conn, FindVO vo, PreparedStatement pstmt, ResultSet rs) {
+		int result = 0;
+		String sql = "delete from dog where desertionNo = ?";
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, vo.getDesertionNo());
+			result = pstmt.executeUpdate();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return result;
+
+	}
+```
+### 공공api에 새로 들어온 유기견 목록 가져와서 update
+Find_manage_data_update.java
+```jsx
+//유기견의 목록을 공공api에서 받아와서 xml파일로 변환 후 db에 입력하는 메서드
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		request.setCharacterEncoding("UTF-8");
+		response.setContentType("text/html; charset=UTF-8");
+			
+		String fileName = "C:\\eclips_java\\fine\\dogNotice.xml";
+		BufferedReader br = null;
+
+		// DocumentBuilderFactory 생성
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		factory.setNamespaceAware(true);
+		DocumentBuilder builder;
+		Document doc = null;
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+		Calendar cal = Calendar.getInstance();
+		String today = sdf.format(cal.getTime());
+
+		try {
+			// OpenApi호출
+			int count = 0;
+			String urlstr = "http://openapi.animal.go.kr/openapi/service/rest/abandonmentPublicSrvc/abandonmentPublic?serviceKey=z1Y%2B%2FKbcw8o3UyZuB3R%2BgSVOx1KhUHOFXWFNf9qVFHHj6bMePFYfs9cPFKx4L1CMZ6sFoWBAydrytd%2Br4aWySw%3D%3D&bgnde=20140601&endde="+today+"&upkind=417000&state=notice&pageNo=1&numOfRows=50000";
+			URL url = new URL(urlstr);
+			HttpURLConnection urlconnection = (HttpURLConnection) url.openConnection();
+
+			// 응답 읽기
+			br = new BufferedReader(new InputStreamReader(urlconnection.getInputStream(), "UTF-8"));
+			String result = "";
+			String line;
+			while ((line = br.readLine()) != null) {
+				result = result + line.trim();// result = URL로 XML을 읽은 값
+			}
+
+			// xml 파싱하기
+			InputSource is = new InputSource(new StringReader(result));
+			builder = factory.newDocumentBuilder();
+			doc = builder.parse(is);
+			XPathFactory xpathFactory = XPathFactory.newInstance();
+			XPath xpath = xpathFactory.newXPath();
+			XPathExpression expr = xpath.compile("//items/item");
+			NodeList nodeList = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
+		
+			BufferedWriter fw = new BufferedWriter(new FileWriter(fileName, false));
+			fw.write("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\r");
+			fw.write("\t\t<items>\r");
+			for (int i = 0; i < nodeList.getLength(); i++) {
+				System.out.println("<item>");
+				NodeList child = nodeList.item(i).getChildNodes();
+				fw.write("\t\t\t<item>\r");
+				count++;
+				for (int j = 0; j < child.getLength(); j++) {
+					Node node = (Node) child.item(j);
+					String as = "\t\t\t\t<" + node.getNodeName() + ">"
+							+ node.getTextContent().replaceAll("&", "과").replace("과#", "ampS") + "</"
+							+ node.getNodeName() + ">\r";
+					fw.write(as);
+
+				}
 
 
+				fw.write("\t\t\t</item>\r");
+			}
+			fw.write("\t\t</items>");
+			fw.flush();
+			fw.close();
+			System.out.println("생성!");
+			System.out.println(count);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+
+		FindService fService = new FindService();
+		int result = fService.insertNoticeSysDate();
+		String ctxpath = request.getContextPath();
+		if (result == 1) {
+			System.out.println("DB저장성공");
+		} else {
+			System.out.println("db다시");
+			
+		}
+		String ctx = request.getContextPath();
+		PrintWriter out = response.getWriter();
+		out.append("<script>alert('데이터를 최신화 하였습니다')</script>");
+		out.println("<script>location.href='"+ctx+"/findHowMany.do'</script>"); 
+		
+	}
+
+}
+```
+FindDAO.java
+```jsx
+//새로 들어온 api정보 인서트
+	public int insertNoticeSysDate(Connection conn, PreparedStatement pstmt) {
+		SimpleDateFormat mSimpleDateFormat = new SimpleDateFormat("yyyyMMdd", Locale.KOREA);
+		Date currentTime = new Date();
+		String mTime = mSimpleDateFormat.format(currentTime);
+		System.out.println(mTime);
+
+		int result = 0;
+		File file = new File("C:\\eclips_java\\fine\\dogNotice.xml");
+		XmlParser xmlParser = new XmlParser(file);
+		List<XmlDataVO> tmp = xmlParser.parse("item");
+		System.out.println("******tmp size: " + tmp.size());
+
+//			  String sql = "insert into dog_kind(dog_kind_no, kind) values(?,?)";
+		String sql = "insert into dog(desertionNo, happenPlace, age,   care_adress, care_name, care_Tel, colorCd, filename, happenDt,"
+				+ "dog_kind_no, neuterYn, noticeEdt, noticeSdt, officetel, orgNm, popfile, processState, sexCd, specialMark, weight) "
+				+ "values(SEQ_dog_NO.NEXTVAL, ?, ?,  ?, ?, ?, ?, ?, ?, (select distinct dog_kind_no from dog_kind where kind like ?), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+		int numOfRow = 0;
+		try {
+			for (int i = 0; i < tmp.size(); i++) {
+//					  System.out.println("vo값:"+Integer.parseInt(tmp.get(i).getNoticeSdt()));
+//					  System.out.println("오늘날자"+Integer.parseInt(mTime));
+				pstmt = conn.prepareStatement(sql);
+				if (Integer.parseInt(tmp.get(i).getNoticeSdt()) < Integer.parseInt(mTime)) {
+					System.out.println("전에있던 데이터입니다. 건너뜀");
+					continue;
+				}
+//				if (Integer.parseInt(tmp.get(i).getNoticeSdt()) == Integer.parseInt(mTime)) {
+//					System.out.println("오늘날짜 데이터 입니다. 건너뜀");
+//					continue;
+//				}
+
+				pstmt.setString(1, tmp.get(i).getHappenPlace());
+				pstmt.setString(2, tmp.get(i).getAge());
+				pstmt.setString(3, tmp.get(i).getCareAddr());
+				pstmt.setString(4, tmp.get(i).getCareNm());
+				pstmt.setString(5, tmp.get(i).getCareTel());
+				pstmt.setString(6, tmp.get(i).getColorCd());
+				pstmt.setString(7, tmp.get(i).getFilename());
+				pstmt.setString(8, tmp.get(i).getHappenDt());
+				pstmt.setString(9, tmp.get(i).getKindCd()); // 푸들 치와와
+				pstmt.setString(10, tmp.get(i).getNeuterYn());
+				pstmt.setString(11, tmp.get(i).getNoticeEdt());
+				pstmt.setString(12, tmp.get(i).getNoticeSdt());
+				pstmt.setString(13, tmp.get(i).getOfficetel());
+				pstmt.setString(14, tmp.get(i).getOrgNm());
+				pstmt.setString(15, tmp.get(i).getPopfile());
+				pstmt.setString(16, tmp.get(i).getProcessState());
+				pstmt.setString(17, tmp.get(i).getSexCd());
+				pstmt.setString(18, tmp.get(i).getSpecialMark());
+				pstmt.setString(19, tmp.get(i).getWeight());
+
+				int r1 = pstmt.executeUpdate();
+				numOfRow++;
+				if (pstmt != null)
+					pstmt.close();
+				if (r1 == 1)
+					System.out.println("insert ok");
+				else {
+					System.out.println("insert fail : " + r1);
+					break;
+				}
+			}
+			System.out.println("sucess to save" + numOfRow);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			try {
+				conn.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return result;
+
+	}
+```
+### 보호소 직원 입양현황 리스트 가져오기
+fine_manage_reservationChck.java
+```jsx
+ //자신의 보호소의 입양예약 리스트 가져오기
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		request.setCharacterEncoding("UTF-8");
+		response.setContentType("text/html; charset=UTF-8");
+		String ctx = request.getContextPath();
+		String id = (String) request.getSession().getAttribute("sessionID");
+		if(!request.getSession().getAttribute("memberLev").equals("2")) {
+			PrintWriter out = response.getWriter();
+			out.append("<script>alert('정상적인 접근이 아닙니다.')</script>");
+			out.println("<script>location.href='"+ctx+"/findHowMany.do'</script>"); 
+			out.flush();
+			out.close();
+		}else {
+			List<ReserVO> list = new ArrayList<ReserVO>();
+			FindService fService = new FindService();
+			list = fService.getReservationInfo(id);
+			if(list == null) {
+				PrintWriter out = response.getWriter();
+				out.append("<script>alert('예약정보가 없습니다')</script>");
+				out.println("<script>location.href='"+ctx+"/findHowMany.do'</script>"); 
+				out.flush();
+				out.close();
+			}else {
+				request.setAttribute("list", list);
+				RequestDispatcher disp = request.getRequestDispatcher("./view/find/fine_find_reservation_list.jsp");
+						
+				disp.forward(request, response);
+				
+			}
+		}
+		
+	}
+```
+FindDAO.java
+```jsx
+//입양 현황 불러오기
+	public List<ReserVO> getReservationInfo(String id, Connection conn, DataSource ds, ResultSet rs,
+			PreparedStatement pstmt) {
+		List<ReserVO> list = new ArrayList<ReserVO>();
+		String sql = "select * from reservation where care_no = (select care_no from member where id = ?)";
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, id);
+			rs = pstmt.executeQuery();
+			if(rs.next()) {
+				do {
+					ReserVO vo = new ReserVO();
+					vo.setResercationNo(rs.getString("RESERCATION_NO"));
+					vo.setDesertionNo(rs.getInt("DESERTIONNO"));
+					vo.setId(rs.getString("ID"));
+					vo.setCareNo(rs.getString("CARE_NO"));
+					vo.setReservationDate(rs.getString("RESERVATION_DATE"));
+					list.add(vo);
+				}while(rs.next());
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return list;
+	}
+```
+```jsx
+```
+```jsx
+```
 ## 작동 영상
 간단한 작동 영상입니다. 
 [![예제](https://img.youtube.com/vi/hPoQP96emqs/0.jpg)](https://youtu.be/hPoQP96emqs) 
