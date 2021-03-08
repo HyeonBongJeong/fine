@@ -54,7 +54,7 @@
 ![kh2조 semi_3](https://user-images.githubusercontent.com/69295153/106628665-630db880-65bd-11eb-9f7b-77147828e2a9.jpg)
 
 ### 유기견 찾기,  클래스 다이어그램
-![Untitled Diagram](https://user-images.githubusercontent.com/69295153/106564533-ae4daa00-6570-11eb-8ce7-e412ecd999c2.png)
+![sssddaa](https://user-images.githubusercontent.com/59170160/110359049-5bd83f80-8080-11eb-88cf-21c903e7d5d8.png)
 
 ### 주요소스 
 #### 입양 게시판 페이징
@@ -1789,6 +1789,4 @@ public class XmlParser {
 }
 
 ```
-## 작동 영상
-간단한 작동 영상입니다. 
-[![예제](https://img.youtube.com/vi/hPoQP96emqs/0.jpg)](https://youtu.be/hPoQP96emqs) 
+
