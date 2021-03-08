@@ -39,6 +39,7 @@
 - 파일 업,다운로드
 - 공공 api사용하여 유기견의 목록 불러오기
 - 유기견 입양 예약 기능
+- 메인 페이지
 
 
 ##  🔧 개발순서
@@ -1598,9 +1599,70 @@ FindDAO.java
 		return list;
 	}
 ```
+### 메인 페이지 한주간 유기된 유기견 리스트
+Find_HowMany.java
 ```jsx
+ //메인페이지에 띄워줄 일주일간 유기된 유기견의 목록과 수
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+		request.setCharacterEncoding("UTF-8");
+		response.setContentType("text/html; charset=UTF-8");
+		FindService fService = new FindService();
+		List<FindVO> list = new ArrayList<FindVO>();
+		int count = fService.getHowManyCount();
+		list = fService.getHowManyLsit();
+		request.setAttribute("list", list);
+		request.setAttribute("count", count);
+		RequestDispatcher disp = request.getRequestDispatcher("./view/main/index.jsp");
+		disp.forward(request, response);
+	}
+
 ```
+FindDAO.java
 ```jsx
+//메인페이지 한주간 유기된 유기견의 수
+	public List<FindVO> getHowManyLsit(Connection conn, DataSource ds, ResultSet rs, PreparedStatement pstmt) {
+		List<FindVO> list = new ArrayList<FindVO>();
+		String sql = "select * from(select rownum rnum, d.* from "
+				+ "(select * from dog where dog_kind_no in (select dog_kind_no from dog_kind) and noticeEdt > '20201202') d) where rnum >= 1 and rnum <= 32";
+		try {
+			pstmt = conn.prepareStatement(sql);
+			rs = pstmt.executeQuery();
+			if(rs.next()) {
+				do {
+					FindVO vo = new FindVO();
+					vo.setDesertionNo(rs.getString("desertionNo"));
+					vo.setHappenPlace(rs.getString("happenplace"));
+					vo.setAge(rs.getString("age"));
+					vo.setCareAddr(rs.getString("care_adress"));
+					vo.setCareNm(rs.getString("care_name"));
+					vo.setCareTel(rs.getString("care_tel"));
+					vo.setColorCd(rs.getString("colorcd"));
+					vo.setFilename(rs.getString("filename"));
+					vo.setHappenDt(rs.getString("happendt"));
+					vo.setKindCd(rs.getString("DOG_KIND_NO"));
+					vo.setNeuterYn(rs.getString("neuteryn"));
+					vo.setNoticeEdt(rs.getString("noticeEdt"));
+					vo.setNoticeSdt(rs.getString("noticeSdt"));
+					vo.setOfficetel(rs.getString("officetel"));
+					vo.setOrgNm(rs.getString("orgnm"));
+					vo.setPopfile(rs.getString("popfile"));
+					vo.setProcessState(rs.getString("processstate"));
+					vo.setSexCd(rs.getString("sexcd"));
+					vo.setSpecialMark(rs.getString("specialMark"));
+					vo.setWeight(rs.getString("weight"));
+					list.add(vo);
+				}while(rs.next());
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return list;
+	}
+
+}
+
 ```
 ## 작동 영상
 간단한 작동 영상입니다. 
