@@ -1382,10 +1382,106 @@ public int getSearchBoardCount(String address, String dogKind, String happenDt, 
 	}
 ```
 
-```
+
+
 ### 공공api에 새로 들어온 유기견 목록 가져와서 update
 
 ![manageUpdate](https://user-images.githubusercontent.com/59170160/110350184-cc7a5e80-8076-11eb-8a42-394d1d2fe80f.png)
+- XmlParser.java
+```jsx
+public class XmlParser {
+	private DocumentBuilderFactory documentBuilderFactory;
+	private DocumentBuilder documentBuilder;
+	private Document document;
+	private NodeList nodeList;
+	private NodeList nodeList2;
+
+	public XmlParser(File file) {
+		System.out.println(file + "파일보여줘");
+		DomParser(file);
+	}
+
+	public void DomParser(File file) {
+		try {
+			documentBuilderFactory = DocumentBuilderFactory.newInstance();
+			documentBuilder = documentBuilderFactory.newDocumentBuilder();
+			document = documentBuilder.parse(file);
+			System.out.println("document : " + document);
+		} catch (ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SAXException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public List<XmlDataVO> parse(String tagName) {
+		List<XmlDataVO> listOfData = new ArrayList<XmlDataVO>();
+		nodeList = document.getElementsByTagName(tagName);
+		System.out.println(nodeList2);
+
+	
+		System.out.println("nodeList.getLength(): " + nodeList.getLength());
+		
+
+		
+		for (int i = 0; i < nodeList.getLength(); i++) {
+
+			Element element = (Element) nodeList.item(i);
+//			String dog_kind_no = this.getTagValue("kindCd", element);
+//			String kind = this.getTagValue("KNm", element);
+			
+			String desertionNo = this.getTagValue("desertionNo", element);
+			String happenPlace = this.getTagValue("happenPlace", element);
+			String age = this.getTagValue("age", element);
+			String careAddr = this.getTagValue("careAddr", element);
+			String careNm = this.getTagValue("careNm", element);
+			String careTel = this.getTagValue("careTel", element);
+			String color = this.getTagValue("colorCd", element);
+			String filename = this.getTagValue("filename", element);
+			String happenDt =this.getTagValue("happenDt", element);
+			String kindCd =this.getTagValue("kindCd", element).substring(4);
+			String neuterYn =this.getTagValue("neuterYn", element);
+			String noticeEdt =this.getTagValue("noticeEdt", element);
+			String noticeSdt =this.getTagValue("noticeSdt", element);
+			String officetel =this.getTagValue("officetel", element);
+			String orgNm =this.getTagValue("orgNm", element);
+			String popfile =this.getTagValue("popfile", element);
+			String processState =this.getTagValue("processState", element);
+			String sexCd =this.getTagValue("sexCd", element);
+			String specialMark =this.getTagValue("specialMark", element);
+			String weight =this.getTagValue("weight", element);
+//			
+//			
+//			XmlDataVO vo = new XmlDataVO(dog_kind_no, kind);
+			XmlDataVO vo = new XmlDataVO(desertionNo, happenPlace, age,careAddr,  careNm, careTel,  color, filename, happenDt,
+					kindCd, neuterYn, noticeEdt, noticeSdt, officetel, orgNm, popfile, processState, sexCd, specialMark, weight);
+			listOfData.add(vo);
+			System.out.println("");
+		}
+		return listOfData;
+	}
+
+	private String getTagValue(String tagName, Element element) {
+		NodeList nodeList= null;
+		if(element.getElementsByTagName(tagName).item(0).getChildNodes() == null) {
+			nodeList = null;
+		}else {
+			nodeList = element.getElementsByTagName(tagName).item(0).getChildNodes();			
+		}
+		System.out.println(nodeList);
+		Node node = nodeList.item(0);
+        System.out.println(node.getNodeName());
+		return node.getNodeValue();
+		
+	}
+}
+
+```
 - Find_manage_data_update.java
 ```jsx
 //유기견의 목록을 공공api에서 받아와서 xml파일로 변환 후 db에 입력하는 메서드
