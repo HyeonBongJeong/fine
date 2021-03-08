@@ -58,7 +58,9 @@
 
 ### 주요소스 
 #### 입양 게시판 페이징
-Find_Adopt_List.java
+![rList](https://user-images.githubusercontent.com/59170160/110350167-c97f6e00-8076-11eb-96f5-0408c5ab4229.png)
+![rSearch](https://user-images.githubusercontent.com/59170160/110350170-ca180480-8076-11eb-985e-9e196bdc6283.png)
+- Find_Adopt_List.java
 ```jsx
 protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		request.setCharacterEncoding("UTF-8");
@@ -131,7 +133,7 @@ protected void doGet(HttpServletRequest request, HttpServletResponse response) t
 	}
 ```
 
-FindDAO.java
+- FindDAO.java
 ```jsx
 	//입양 유기견 가져오기 메서드 DAO
 	public List<FindVO> getFindAdoptInfo(int startRnum, int endRnum, String id, Connection conn, PreparedStatement pstmt,
@@ -209,8 +211,9 @@ FindDAO.java
 		return result;
 	}
 ```
+
 #### 입양 게시판 페이징(검색)
-Find_Adopt_Search.java
+- Find_Adopt_Search.java
 ```jsx
 //입양할 유기견 검색리스트
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -293,7 +296,7 @@ Find_Adopt_Search.java
 	
 	}
 ```
-FindDAO.java
+- FindDAO.java
 ```jsx
 //입양 할 유기견 검색 메서드
 	public int getAdoptSearchBoardCount(String address, String dogKind, Connection conn, PreparedStatement pstmt,
@@ -327,8 +330,13 @@ FindDAO.java
 		return cnt;
 	}
 ```
+
+
 #### 입양 유기견 상세정보
-Find_Adopt_Detail.java
+![rDetail](https://user-images.githubusercontent.com/59170160/110350194-cdab8b80-8076-11eb-81c7-bac0ac61e7fe.png)
+![rDetailMap](https://user-images.githubusercontent.com/59170160/110350165-c8e6d780-8076-11eb-9fbf-12fdf3cfa8ea.png)
+- Find_Adopt_Detail.java
+
 ```jsx
 //입양할 유기견 상세 정보
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -356,7 +364,7 @@ Find_Adopt_Detail.java
 		
 	}
 ```
-FindDAO.java
+- FindDAO.java
 ```jsx
 //입양할 유기견 상세 정보
 	public List<FindVO> getFindInfo(int no, Connection conn, PreparedStatement pstmt, ResultSet rs) {
@@ -401,8 +409,9 @@ FindDAO.java
 		return list;
 	}
 ```
+
 #### 입양 페이지 이동할 때 회원 등급 체크
-Find_Reservation.java
+- Find_Reservation.java
 ```jsx
 //입양예약 페이지 이동 메서드
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -449,7 +458,7 @@ Find_Reservation.java
 
 	}
 ```
-FindDAO.java
+- FindDAO.java
 ```jsx
 //회원의 등급을 가져오는 메서드
 	public int gerMemberGrade(String id, Connection conn, PreparedStatement pstmt, ResultSet rs) {
@@ -539,8 +548,9 @@ FindDAO.java
 		return list;
 	}
 ```
-#### 입양 정보 
-Find_Reservation_Adopt.java
+#### 입양 정보
+![mResernavtion](https://user-images.githubusercontent.com/59170160/110350192-cdab8b80-8076-11eb-87f3-29ec055aad01.png)
+- Find_Reservation_Adopt.java
 ```jsx
     //입양예약 메서드
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -632,7 +642,7 @@ Find_Reservation_Adopt.java
 	
 	}
 ```
-FindDAO.java
+- FindDAO.java
 ```jsx
 //입양예약 메서드
 	public int insertReservatoin(String careNoResult, String adoptDate, int dogNum, String id, Connection conn,
@@ -656,7 +666,8 @@ FindDAO.java
 	}
 ```
 #### 입양 관련 서류 다운로드
-Find_document_down.java
+![rReservationOk](https://user-images.githubusercontent.com/59170160/110350169-ca180480-8076-11eb-8c77-8cd9c20d052d.png)
+- Find_document_down.java
 ```jsx
     //입양 관련서류 파일 다운로드
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -692,7 +703,10 @@ Find_document_down.java
 	}
 ```
 ### 잃어버린 유기견 리스트 
-Find_Lists.java
+
+![findList](https://user-images.githubusercontent.com/59170160/110350175-cab09b00-8076-11eb-8fd4-dc33986fc48d.png)
+![findSearch](https://user-images.githubusercontent.com/59170160/110350178-cb493180-8076-11eb-9872-70d9b21e3992.png)
+- Find_Lists.java
 ```jsx
  //잃어버린 유기견 리스트
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -757,7 +771,7 @@ Find_Lists.java
 	}
 
 ```
-FindDAO.java
+- FindDAO.java
 ```jsx
 //페이징을 위한 데이터 개수 세는 메서드
 	public int getBoardCount(Connection conn, PreparedStatement pstmt, ResultSet rs) {
@@ -823,8 +837,9 @@ FindDAO.java
 
 	}
 ```
+
 ### 잃어버린 유기견 리스트(검색) 
-Find_Search.java
+- Find_Search.java
 ```jsx
     //잃어버린 유기견 검색 메서드
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -904,7 +919,7 @@ Find_Search.java
 		dis.forward(request, response);
 	}
 ```
-FindDAO.java
+- FindDAO.java
 ```jsx
 //유기견 찾기 검색 리스트 갯수 세는 메서드
 public int getSearchBoardCount(String address, String dogKind, String happenDt, Connection conn,
@@ -987,7 +1002,10 @@ public int getSearchBoardCount(String address, String dogKind, String happenDt, 
 	}
 ```
 ### 잃어버린 유기견 상세 정보 
-Find_Detail.java
+![findDetail](https://user-images.githubusercontent.com/59170160/110350174-cab09b00-8076-11eb-8a8b-47ebd9e94c2e.png)
+![fineDetailMap](https://user-images.githubusercontent.com/59170160/110350180-cb493180-8076-11eb-8c5f-ef2e22027f06.png)
+
+- Find_Detail.java
 ```jsx
  //유기견 찾기 상세정보
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -1004,7 +1022,7 @@ Find_Detail.java
 		disp.forward(request, response);
 	}
 ```
-FindDAO.java
+- FindDAO.java
 ```jsx
 //입양할 유기견 상세 정보
 	public List<FindVO> getFindInfo(int no, Connection conn, PreparedStatement pstmt, ResultSet rs) {
@@ -1050,7 +1068,9 @@ FindDAO.java
 	}
 ```
 ### 제휴 보호소 관리자 별 보호중인 유기견 목록 
-Fine_find_manage_List.java
+
+![mnageLsit](https://user-images.githubusercontent.com/59170160/110350188-cd12f500-8076-11eb-8d97-f15aefcf462d.png)
+- Fine_find_manage_List.java
 ```jsx
     //매니저 자신의 보호소에 등록된 유기견 정보 가져오기 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -1117,7 +1137,7 @@ Fine_find_manage_List.java
 					dis.forward(request, response);
 				}
 ```
-FindDAO.java
+- FindDAO.java
 ```jsx
 //보호소 별 보호중인 유기견 목록가져오는 메서드
 	public List<FindVO> getFindManageList(String checkId, String lev, int startRnum, int endRnum, Connection conn,
@@ -1165,8 +1185,72 @@ FindDAO.java
 		return list;
 	}
 ```
+### 입양되거나 찾은 유기견 삭제 메서드
+
+- Find_manage_delete.java
+```jsx
+    //유기견 삭제 메서드
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		FindVO vo = new FindVO();
+		FindService fService = new FindService();
+		ServletContext context = getServletContext();
+		String no = request.getParameter("no");
+		vo.setDesertionNo(no);
+		
+		String path = context.getRealPath("upload\\dog"); 
+		fService.FindDeleteFileName(vo);
+		String filepath = vo.getFilename();
+		filepath.substring(11);
+		System.out.println("filepath : "+filepath);
+		
+		System.out.println(path);
+		File f = new File(path +"\\"+filepath);
+		if(f.exists()){
+			f.delete();
+			System.out.println("파일 삭제됨");
+		}else{
+			System.out.println("파일 없음");
+		}
+		
+		
+		int result = fService.FindDelete(vo);
+		System.out.println(result);
+		
+		if(result==1) {
+			PrintWriter out = response.getWriter();
+			out.println("<script>alert('삭제가 완료 되었습니다.')</script>");
+			response.sendRedirect("fine_find_manage_List.do");
+		}else {
+			PrintWriter out = response.getWriter();
+			out.println("<script>alert('삭제를 실패 하였습니다.')</script>");
+			response.sendRedirect("fine_find_manage_List.do");
+		}
+	
+	
+	}
+```
+- FindDAO.java
+```jsx
+//유기견 주인이 찾은 유기견 삭제 메서드
+	public int findDelete(Connection conn, FindVO vo, PreparedStatement pstmt, ResultSet rs) {
+		int result = 0;
+		String sql = "delete from dog where desertionNo = ?";
+		try {
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, vo.getDesertionNo());
+			result = pstmt.executeUpdate();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return result;
+
+	}
 ### 보호소에 들어온 유기견 입력 
-Find_fine_manage_write.java
+
+![manageWrite](https://user-images.githubusercontent.com/59170160/110350187-cc7a5e80-8076-11eb-81d0-35f6b74a9856.png)
+- Find_fine_manage_write.java
 ```jsx
 	//관리자가 직접 유기견의 정보 db인서트
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -1247,7 +1331,7 @@ Find_fine_manage_write.java
 
 }
 ```
-FindDAO.java
+- FindDAO.java
 ```jsx
 //유기견 정보 입력
 	public int FindMangerWrite(String checkId, FindVO vo, String file, Connection conn, PreparedStatement pstmt) {
@@ -1297,70 +1381,12 @@ FindDAO.java
 		return result;
 	}
 ```
-### 보호소에 들어온 유기견 입력
-Find_manage_delete.java
-```jsx
-    //유기견 삭제 메서드
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		FindVO vo = new FindVO();
-		FindService fService = new FindService();
-		ServletContext context = getServletContext();
-		String no = request.getParameter("no");
-		vo.setDesertionNo(no);
-		
-		String path = context.getRealPath("upload\\dog"); 
-		fService.FindDeleteFileName(vo);
-		String filepath = vo.getFilename();
-		filepath.substring(11);
-		System.out.println("filepath : "+filepath);
-		
-		System.out.println(path);
-		File f = new File(path +"\\"+filepath);
-		if(f.exists()){
-			f.delete();
-			System.out.println("파일 삭제됨");
-		}else{
-			System.out.println("파일 없음");
-		}
-		
-		
-		int result = fService.FindDelete(vo);
-		System.out.println(result);
-		
-		if(result==1) {
-			PrintWriter out = response.getWriter();
-			out.println("<script>alert('삭제가 완료 되었습니다.')</script>");
-			response.sendRedirect("fine_find_manage_List.do");
-		}else {
-			PrintWriter out = response.getWriter();
-			out.println("<script>alert('삭제를 실패 하였습니다.')</script>");
-			response.sendRedirect("fine_find_manage_List.do");
-		}
-	
-	
-	}
-```
-FindDAO.java
-```jsx
-//유기견 주인이 찾은 유기견 삭제 메서드
-	public int findDelete(Connection conn, FindVO vo, PreparedStatement pstmt, ResultSet rs) {
-		int result = 0;
-		String sql = "delete from dog where desertionNo = ?";
-		try {
-			pstmt = conn.prepareStatement(sql);
-			pstmt.setString(1, vo.getDesertionNo());
-			result = pstmt.executeUpdate();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 
-		return result;
-
-	}
 ```
 ### 공공api에 새로 들어온 유기견 목록 가져와서 update
-Find_manage_data_update.java
+
+![manageUpdate](https://user-images.githubusercontent.com/59170160/110350184-cc7a5e80-8076-11eb-8a42-394d1d2fe80f.png)
+- Find_manage_data_update.java
 ```jsx
 //유기견의 목록을 공공api에서 받아와서 xml파일로 변환 후 db에 입력하는 메서드
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -1451,7 +1477,7 @@ Find_manage_data_update.java
 
 }
 ```
-FindDAO.java
+- FindDAO.java
 ```jsx
 //새로 들어온 api정보 인서트
 	public int insertNoticeSysDate(Connection conn, PreparedStatement pstmt) {
@@ -1534,7 +1560,9 @@ FindDAO.java
 	}
 ```
 ### 보호소 직원 입양현황 리스트 가져오기
-fine_manage_reservationChck.java
+
+![manageReservationLsit](https://user-images.githubusercontent.com/59170160/110350182-cbe1c800-8076-11eb-936e-8dcade9cabd0.png)
+- fine_manage_reservationChck.java
 ```jsx
  //자신의 보호소의 입양예약 리스트 가져오기
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -1569,7 +1597,7 @@ fine_manage_reservationChck.java
 		
 	}
 ```
-FindDAO.java
+- FindDAO.java
 ```jsx
 //입양 현황 불러오기
 	public List<ReserVO> getReservationInfo(String id, Connection conn, DataSource ds, ResultSet rs,
@@ -1600,7 +1628,8 @@ FindDAO.java
 	}
 ```
 ### 메인 페이지 한주간 유기된 유기견 리스트
-Find_HowMany.java
+![main](https://user-images.githubusercontent.com/59170160/110350181-cbe1c800-8076-11eb-9cb5-26bc0eb54e01.png)
+- Find_HowMany.java
 ```jsx
  //메인페이지에 띄워줄 일주일간 유기된 유기견의 목록과 수
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -1618,7 +1647,7 @@ Find_HowMany.java
 	}
 
 ```
-FindDAO.java
+- FindDAO.java
 ```jsx
 //메인페이지 한주간 유기된 유기견의 수
 	public List<FindVO> getHowManyLsit(Connection conn, DataSource ds, ResultSet rs, PreparedStatement pstmt) {
